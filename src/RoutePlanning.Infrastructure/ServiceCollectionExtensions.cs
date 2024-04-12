@@ -21,7 +21,7 @@ public static class ServiceCollectionExtensions
         });
 
         services.AddDomainDrivenDesign(options => options.UseDbContext<RoutePlanningDatabaseContext>());
-        services.AddUnitOfWork(builder => builder.UseAmbientTransactions().With<RoutePlanningDatabaseContext>());
+        services.AddUnitOfWork(builder => builder.UseAmbientTransactions(x => x.For<RoutePlanningDatabaseContext>()));
 
         return services;
     }

@@ -7,17 +7,17 @@ namespace RoutePlanning.Application.Locations.Commands.CreateTwoWayConnection;
 
 public sealed class CreateTwoWayConnectionCommandHandler : ICommandHandler<CreateTwoWayConnectionCommand>
 {
-    private readonly IRepository<Location> _locations;
+    private readonly IRepository<Location> locations;
 
     public CreateTwoWayConnectionCommandHandler(IRepository<Location> locations)
     {
-        _locations = locations;
+        this.locations = locations;
     }
 
     public async Task Handle(CreateTwoWayConnectionCommand command, CancellationToken cancellationToken)
     {
-        var locationA = await _locations.FirstAsync(l => l.Id == command.LocationAId, cancellationToken);
-        var locationB = await _locations.FirstAsync(l => l.Id == command.LocationBId, cancellationToken);
+        var locationA = await locations.FirstAsync(l => l.Id == command.LocationAId, cancellationToken);
+        var locationB = await locations.FirstAsync(l => l.Id == command.LocationBId, cancellationToken);
 
         locationA.AddConnection(locationB, command.Distance);
         locationB.AddConnection(locationA, command.Distance);

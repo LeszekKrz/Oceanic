@@ -4,16 +4,16 @@ namespace RoutePlanning.Domain.Locations.Services;
 
 public sealed class ShortestDistanceService : IShortestDistanceService
 {
-    private readonly IQueryable<Location> _locations;
+    private readonly IQueryable<Location> locations;
 
     public ShortestDistanceService(IQueryable<Location> locations)
     {
-        _locations = locations;
+        this.locations = locations;
     }
 
     public int CalculateShortestDistance(Location source, Location target)
     {
-        var locations = _locations.Include(l => l.Connections).ThenInclude(c => c.Destination);
+        var locations = this.locations.Include(l => l.Connections).ThenInclude(c => c.Destination);
 
         var path = CalculateShortestPath(locations, source, target);
 

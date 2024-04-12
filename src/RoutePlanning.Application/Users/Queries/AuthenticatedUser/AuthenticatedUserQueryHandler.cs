@@ -7,11 +7,11 @@ namespace RoutePlanning.Application.Users.Queries.AuthenticatedUser;
 
 public sealed class AuthenticatedUserQueryHandler : IQueryHandler<AuthenticatedUserQuery, AuthenticatedUser?>
 {
-    private readonly IQueryable<User> _users;
+    private readonly IQueryable<User> users;
 
     public AuthenticatedUserQueryHandler(IQueryable<User> users)
     {
-        _users = users;
+        this.users = users;
     }
 
     public async Task<AuthenticatedUser?> Handle(AuthenticatedUserQuery request, CancellationToken cancellationToken)
@@ -19,7 +19,7 @@ public sealed class AuthenticatedUserQueryHandler : IQueryHandler<AuthenticatedU
         // Note that it is considered bad practise to roll your own security like this. Use establised frameworks and services for authentication instead.
         var hashedPassword = User.ComputePasswordHash(request.Password);
 
-        var authenticatedUser = await _users
+        var authenticatedUser = await users
             .Where(u => u.Username.ToLower() == request.Username.ToLower())
             .Where(u => u.PasswordHash == hashedPassword)
             .Select(MapAuthenticatedUser)

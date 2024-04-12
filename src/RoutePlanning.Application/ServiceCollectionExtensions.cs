@@ -1,7 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using RoutePlanning.Domain;
 using Netcompany.Net.Cqs;
-using Netcompany.Net.Validation;
+using Netcompany.Net.DomainDrivenDesign;
+using Netcompany.Net.Events;
+using RoutePlanning.Domain;
 
 namespace RoutePlanning.Application;
 
@@ -9,10 +10,13 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddRoutePlanningApplication(this IServiceCollection services)
     {
-        services.AddRoutePlanningDomain();
+        services.AddEventHandling();
+
+        services
+            .AddDomainDrivenDesign()
+            .WithRoutePlanning();
 
         services.AddCqs();
-        services.AddValidation();
 
         return services;
     }

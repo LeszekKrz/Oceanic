@@ -1,23 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
-
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
+    <TargetFramework>net8.0</TargetFramework>
   </PropertyGroup>
-
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.Negotiate" Version="6.0.22" />
-    <PackageReference Include="Netcompany.Net.ErrorHandling.AspNetCore" Version="1.0.0" />
-    <PackageReference Include="Netcompany.Net.Logging.Serilog" Version="1.0.1" />
-    <PackageReference Include="Netcompany.Net.UnitOfWork.Cqs" Version="1.0.1" />
-    <PackageReference Include="Netcompany.Net.Validation.AspNetCore" Version="1.0.0" />
-    <PackageReference Include="Netcompany.Net.Validation.Cqs" Version="1.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Negotiate" Version="8.0.4" />
+    <PackageReference Include="Netcompany.Net.ErrorHandling.AspNetCore" Version="2.0.0" />
+    <PackageReference Include="Netcompany.Net.Logging.Serilog" Version="2.0.1" />
+    <PackageReference Include="Netcompany.Net.UnitOfWork.Cqs" Version="2.0.0" />
+    <PackageReference Include="Netcompany.Net.Validation.AspNetCore" Version="2.0.0" />
+    <PackageReference Include="Netcompany.Net.Validation.Cqs" Version="2.0.0" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\RoutePlanning.Application\RoutePlanning.Application.csproj" />
     <ProjectReference Include="..\RoutePlanning.Infrastructure\RoutePlanning.Infrastructure.csproj" />
   </ItemGroup>
-
 </Project>

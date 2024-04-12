@@ -11,11 +11,11 @@ namespace RoutePlanning.Client.Web.Api;
 [Authorize(nameof(TokenRequirement))]
 public sealed class RoutesController : ControllerBase
 {
-    private readonly IMediator _mediator;
+    private readonly IMediator mediator;
 
     public RoutesController(IMediator mediator)
     {
-        _mediator = mediator;
+        this.mediator = mediator;
     }
 
     [HttpGet("[action]")]
@@ -27,6 +27,6 @@ public sealed class RoutesController : ControllerBase
     [HttpPost("[action]")]
     public async Task AddTwoWayConnection(CreateTwoWayConnectionCommand command)
     {
-        await _mediator.Send(command);
+        await mediator.Send(command);
     }
 }

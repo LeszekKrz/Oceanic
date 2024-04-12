@@ -5,26 +5,26 @@ namespace RoutePlanning.Client.Web.ApiTests.Authentication;
 
 public class TokenTests : IClassFixture<RoutePlanningApplicationFactory>
 {
-    private readonly RoutePlanningApplicationFactory _factory;
-    private readonly HttpClient _client;
+    private readonly RoutePlanningApplicationFactory factory;
+    private readonly HttpClient client;
 
     public TokenTests(RoutePlanningApplicationFactory factory)
     {
-        _factory = factory;
-        _client = _factory.HttpClient;
+        this.factory = factory;
+        client = this.factory.HttpClient;
     }
 
     [Fact]
     public async void ShouldGetHelloWorld()
     {
         // Arrange
-        var url = _factory.GetRoute<Program, RoutesController>(x => x.HelloWorld);
+        var url = factory.GetRoute<Program, RoutesController>(x => x.HelloWorld);
 
         // Act
         var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Add("Token", "TheSecretApiToken");
 
-        var response = await _client.SendAsync(request);
+        var response = await client.SendAsync(request);
 
         // Assert
         var content = await response.Content.ReadAsStringAsync();

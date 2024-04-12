@@ -13,15 +13,15 @@ public sealed class Location : AggregateRoot<Location>
 
     public string Name { get; set; }
 
-    private readonly List<Connection> _connections = new();
+    private readonly List<Connection> connections = [];
 
-    public IReadOnlyCollection<Connection> Connections => _connections.AsReadOnly();
+    public IReadOnlyCollection<Connection> Connections => connections.AsReadOnly();
 
     public Connection AddConnection(Location destination, int distance)
     {
         Connection connection = new(this, destination, distance);
 
-        _connections.Add(connection);
+        connections.Add(connection);
 
         return connection;
     }

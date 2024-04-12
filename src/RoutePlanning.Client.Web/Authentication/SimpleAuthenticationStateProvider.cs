@@ -6,24 +6,24 @@ namespace RoutePlanning.Client.Web.Authentication;
 
 public sealed class SimpleAuthenticationStateProvider : AuthenticationStateProvider
 {
-    private readonly ProtectedBrowserStorage _browserStorage;
-    private readonly AuthenticationState _anonymousState;
+    private readonly ProtectedBrowserStorage browserStorage;
+    private readonly AuthenticationState anonymousState;
 
     public SimpleAuthenticationStateProvider(ProtectedBrowserStorage browserStorage)
     {
-        _browserStorage = browserStorage;
-        _anonymousState = new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
+        this.browserStorage = browserStorage;
+        anonymousState = new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
     }
 
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
-        var userSessionStorageResult = await _browserStorage.GetAsync<UserSession>(nameof(UserSession));
+        var userSessionStorageResult = await browserStorage.GetAsync<UserSession>(nameof(UserSession));
 
         var userSession = userSessionStorageResult.Success ? userSessionStorageResult.Value : null;
 
         if (userSession is null)
         {
-            return _anonymousState;
+            return anonymousState;
         }
 
         return CreateUserAuthenticationState(userSession);
@@ -31,7 +31,7 @@ public sealed class SimpleAuthenticationStateProvider : AuthenticationStateProvi
 
     public async Task SetAuthenticationStateAsync(UserSession userSession)
     {
-        await _browserStorage.SetAsync(nameof(UserSession), userSession);
+        await browserStorage.SetAsync(nameof(UserSession), userSession);
 
         var userAuthState = CreateUserAuthenticationState(userSession);
         NotifyAuthenticationStateChanged(Task.FromResult(userAuthState));
@@ -39,9 +39,9 @@ public sealed class SimpleAuthenticationStateProvider : AuthenticationStateProvi
 
     public async Task ClearAuthenticationStateAsync()
     {
-        await _browserStorage.DeleteAsync(nameof(UserSession));
+        await browserStorage.DeleteAsync(nameof(UserSession));
 
-        NotifyAuthenticationStateChanged(Task.FromResult(_anonymousState));
+        NotifyAuthenticationStateChanged(Task.FromResult(anonymousState));
     }
 
     private static AuthenticationState CreateUserAuthenticationState(UserSession userSession)
