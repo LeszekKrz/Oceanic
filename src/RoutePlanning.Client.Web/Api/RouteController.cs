@@ -28,12 +28,6 @@ public sealed class RoutesController : ControllerBase
     }
 
     [HttpPost("[action]")]
-    public async Task AddTwoWayConnection(CreateTwoWayConnectionCommand command)
-    {
-        await mediator.Send(command);
-    }
-
-    [HttpPost("[action]")]
     public async Task<RouteInfoDTO> GetRoute(GetRouteRequest request, CancellationToken cancellationToken)
     {
         return await mediator.Send(request, cancellationToken);
