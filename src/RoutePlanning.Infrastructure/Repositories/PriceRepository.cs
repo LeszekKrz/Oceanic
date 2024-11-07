@@ -21,9 +21,9 @@ public class PriceRepository : IPriceRepository
     }
 
 
-    public async Task ChangePrice(string type, float newPrice, CancellationToken cancellationToken)
+    public async Task ChangePrice(string type, string weight, float newPrice, CancellationToken cancellationToken)
     {
-        var existingPrice = await _context.Set<Price>().FindAsync(new object[] { type }, cancellationToken);
+        var existingPrice = await _context.Set<Price>().FindAsync(new object[] { type, weight }, cancellationToken);
 
         if (existingPrice == null)
         {
@@ -40,5 +40,5 @@ public class PriceRepository : IPriceRepository
 
 public interface IPriceRepository
 {
-    public Task ChangePrice(string type, float newPrice, CancellationToken cancellationToken);
+    public Task ChangePrice(string type, string weight, float newPrice, CancellationToken cancellationToken);
 }

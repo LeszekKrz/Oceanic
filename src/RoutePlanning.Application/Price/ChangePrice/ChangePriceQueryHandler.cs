@@ -25,7 +25,7 @@ public sealed class ChangePriceQueryHandler :IQueryHandler<ChangePriceQuery, boo
             return false;
         }
 
-        await priceRepository.ChangePrice(request.Type, request.Price, cancellationToken);
+        await priceRepository.ChangePrice(request.Type, request.weight, request.Price, cancellationToken);
 
         return true;
     }
