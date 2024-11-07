@@ -20,6 +20,7 @@ public sealed class Program
         builder.Services.AddCqs(options => options.UseValidation().UseUnitOfWork());
         builder.Services.AddUnhandledExceptionMiddleware();
         builder.Services.AddValidationMiddleware();
+        builder.Services.AddRepositories();
 
         builder.Services.AddRazorPages();
         builder.Services.AddServerSideBlazor();

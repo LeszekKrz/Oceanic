@@ -2,4 +2,4 @@
 
 namespace RoutePlanning.Application.Users.Queries.AuthenticatedUser;
 
-public sealed record AuthenticatedUserQuery(string Username, string Password) : IQuery<AuthenticatedUser?>;
+public sealed record AuthenticatedUserQuery(string Username, string Password) : IQuery<Domain.Users.AuthenticatedUser?>;

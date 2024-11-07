@@ -16,6 +16,9 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RoutePlanning.Infrastructure", "src\RoutePlanning.Infrastructure\RoutePlanning.Infrastructure.csproj", "{4E050A11-5201-4369-B2D8-F8576CF6BDE2}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RoutePlanning.Application", "src\RoutePlanning.Application\RoutePlanning.Application.csproj", "{8940AB0D-F16C-467D-A124-636F73A42520}"
+	ProjectSection(ProjectDependencies) = postProject
+		{4E050A11-5201-4369-B2D8-F8576CF6BDE2} = {4E050A11-5201-4369-B2D8-F8576CF6BDE2}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{E6447730-25D6-4761-90AA-07B5F9F373F5}"
 EndProject

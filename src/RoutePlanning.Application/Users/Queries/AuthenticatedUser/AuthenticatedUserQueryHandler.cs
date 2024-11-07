@@ -1,32 +1,25 @@
-﻿using System.Linq.Expressions;
-using Microsoft.EntityFrameworkCore;
-using Netcompany.Net.Cqs.Queries;
+﻿using Netcompany.Net.Cqs.Queries;
 using RoutePlanning.Domain.Users;
+using RoutePlanning.Infrastructure.Repositories;
 
 namespace RoutePlanning.Application.Users.Queries.AuthenticatedUser;
 
-public sealed class AuthenticatedUserQueryHandler : IQueryHandler<AuthenticatedUserQuery, AuthenticatedUser?>
+public sealed class AuthenticatedUserQueryHandler : IQueryHandler<AuthenticatedUserQuery, Domain.Users.AuthenticatedUser?>
 {
-    private readonly IQueryable<User> users;
+    private readonly IUserRepository userRepository;
 
-    public AuthenticatedUserQueryHandler(IQueryable<User> users)
+    public AuthenticatedUserQueryHandler(IUserRepository userRepository)
     {
-        this.users = users;
+        this.userRepository = userRepository;
     }
 
-    public async Task<AuthenticatedUser?> Handle(AuthenticatedUserQuery request, CancellationToken cancellationToken)
+    public async Task<Domain.Users.AuthenticatedUser?> Handle(AuthenticatedUserQuery request, CancellationToken cancellationToken)
     {
         // Note that it is considered bad practise to roll your own security like this. Use establised frameworks and services for authentication instead.
         var hashedPassword = User.ComputePasswordHash(request.Password);
 
-        var authenticatedUser = await users
-            .Where(u => u.Username.ToLower() == request.Username.ToLower())
-            .Where(u => u.PasswordHash == hashedPassword)
-            .Select(MapAuthenticatedUser)
-            .SingleOrDefaultAsync(cancellationToken);
+        var authenticatedUser = await userRepository.getAuthenticatedUser(request.Username, hashedPassword, cancellationToken);
 
         return authenticatedUser;
     }
-
-    private static Expression<Func<User, AuthenticatedUser>> MapAuthenticatedUser => u => new AuthenticatedUser(u.Id, u.Username);
 }

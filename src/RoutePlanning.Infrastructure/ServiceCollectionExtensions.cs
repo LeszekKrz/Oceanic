@@ -6,6 +6,7 @@ using Netcompany.Net.UnitOfWork.AmbientTransactions;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using RoutePlanning.Infrastructure.Repositories;
 
 namespace RoutePlanning.Infrastructure;
 public static class ServiceCollectionExtensions
@@ -23,6 +24,13 @@ public static class ServiceCollectionExtensions
         services.AddDomainDrivenDesign(options => options.UseDbContext<RoutePlanningDatabaseContext>());
         services.AddUnitOfWork(builder => builder.UseAmbientTransactions(x => x.For<RoutePlanningDatabaseContext>()));
 
+        // add repositories in here
+
         return services;
+    }
+
+    public static void AddRepositories(this IServiceCollection serviceCollection)
+    {
+        serviceCollection.AddScoped<IUserRepository, UserRepository>();
     }
 }

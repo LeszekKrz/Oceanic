@@ -2,6 +2,7 @@
 using MediatR;
 using RoutePlanning.Application.Users.Queries.AuthenticatedUser;
 using RoutePlanning.Client.Web.Authentication;
+using RoutePlanning.Domain.Users;
 
 namespace RoutePlanning.Client.Web.Pages.Core;
 
