@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.4" />
+    <PackageReference Include="Netcompany.Net.Cqs" Version="2.0.0" />
+    <PackageReference Include="Netcompany.Net.Events" Version="2.0.0" />
+    <PackageReference Include="Netcompany.Net.Validation" Version="2.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\RoutePlanning.Domain\RoutePlanning.Domain.csproj" />
+    <ProjectReference Include="..\RoutePlanning.Infrastructure\RoutePlanning.Infrastructure.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Price\NewFolder\" />
+  </ItemGroup>
+</Project>

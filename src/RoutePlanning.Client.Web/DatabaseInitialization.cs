@@ -1,5 +1,6 @@
 ﻿using Netcompany.Net.UnitOfWork;
 using RoutePlanning.Domain.Locations;
+using RoutePlanning.Domain.Price;
 using RoutePlanning.Domain.Users;
 using RoutePlanning.Infrastructure.Database;
 
@@ -51,6 +52,15 @@ public static class DatabaseInitialization
 
         var bob = new User("bob", User.ComputePasswordHash("!CapableStudentCries25"));
         await context.AddAsync(bob);
+
+        var price1 = new Price(">1kg", 50);
+        await context.AddAsync(price1);
+
+        var price2 = new Price(">5kg", 100);
+        await context.AddAsync(price2);
+
+        var price3 = new Price("5kg<", 150);
+        await context.AddAsync(price3);
     }
 
     private static void CreateTwoWayConnection(Location locationA, Location locationB, int distance)

@@ -12,11 +12,11 @@ public sealed class CreateUserQueryHandler : IQueryHandler<CreateUserQuery, Doma
     {
         this.userRepository = userRepository;
     }
-    public Task<Domain.Users.AuthenticatedUser?> Handle(CreateUserQuery request, CancellationToken cancellationToken)
+    public async Task<Domain.Users.AuthenticatedUser?> Handle(CreateUserQuery request, CancellationToken cancellationToken)
     {
         var user = new User(request.username, request.password);
         var authenticateUser = userRepository.createUser(user, cancellationToken);
 
-        return authenticateUser;
+        return await authenticateUser;
     }
 }
