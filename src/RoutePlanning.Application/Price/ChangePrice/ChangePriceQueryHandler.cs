@@ -1,4 +1,5 @@
-﻿using Netcompany.Net.Cqs.Queries;
+﻿using Microsoft.EntityFrameworkCore.Design;
+using Netcompany.Net.Cqs.Queries;
 using RoutePlanning.Infrastructure.Repositories;
 
 namespace RoutePlanning.Application.Price.ChangePrice;
@@ -19,7 +20,7 @@ public sealed class ChangePriceQueryHandler :IQueryHandler<ChangePriceQuery, boo
         {
             return false;
         }
-        if (!authenticatedUser.IsAdmin)
+        if (!authenticatedUser.IsAdmin && !authenticatedUser.IsEmployee)
         {
             return false;
         }
