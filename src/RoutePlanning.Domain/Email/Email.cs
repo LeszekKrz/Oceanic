@@ -1,15 +1,17 @@
-﻿namespace RoutePlanning.Domain.Email;
-public class Email
+﻿using Netcompany.Net.DomainDrivenDesign.Models;
+
+namespace RoutePlanning.Domain.Email;
+public sealed class Email : AggregateRoot<Email>
 {
-    public Email(string bookingReference, string recieverEmail)
+    public Email(Guid bookingReference, string recieverEmail)
     {
         BookingReference = bookingReference;
         RecieverEmail = recieverEmail;
         DateSent = DateTime.Now;
     }
-    public string BookingReference { get; set; }
+    public Guid BookingReference { get; }
 
-    public string RecieverEmail { get; set; }
+    public string RecieverEmail { get; }
 
-    public DateTime DateSent { get; set; }
+    public DateTime DateSent { get; }
 }

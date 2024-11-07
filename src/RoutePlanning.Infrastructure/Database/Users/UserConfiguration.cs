@@ -12,5 +12,10 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.Property(x => x.Username);
         builder.Property(x => x.PasswordHash);
+        builder.Property(x => x.Email);
+        builder.Property(x => x.Address);
+        builder.Property(x => x.PhoneNumber);
+        builder.Property(x => x.IsEmployee);
+        builder.Property(x => x.IsAdmin);
     }
 }

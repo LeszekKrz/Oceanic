@@ -1,7 +1,8 @@
 ﻿using System.Security.Cryptography.X509Certificates;
+using Netcompany.Net.DomainDrivenDesign.Models;
 
 namespace RoutePlanning.Domain.Parcel;
-public class Parcel
+public class Parcel : AggregateRoot<Parcel>
 {
     public Parcel(Guid bookingReference, float weight, float height, float width)
     {
