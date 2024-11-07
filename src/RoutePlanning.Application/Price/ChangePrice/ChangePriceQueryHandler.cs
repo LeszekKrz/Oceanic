@@ -14,7 +14,7 @@ public sealed class ChangePriceQueryHandler :IQueryHandler<ChangePriceQuery, boo
     }
     public async Task<bool> Handle(ChangePriceQuery request, CancellationToken cancellationToken)
     {
-        var authenticatedUser = await userRepository.GetUserById(request.user.Id, cancellationToken);
+        var authenticatedUser = await userRepository.GetUserById(request.User.Id, cancellationToken);
         if (authenticatedUser == null)
         {
             return false;

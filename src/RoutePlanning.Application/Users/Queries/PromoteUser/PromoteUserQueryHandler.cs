@@ -1,5 +1,4 @@
 ﻿using Netcompany.Net.Cqs.Queries;
-using RoutePlanning.Domain.Users;
 using RoutePlanning.Infrastructure.Repositories;
 
 namespace RoutePlanning.Application.Users.Queries.PromoteUser;

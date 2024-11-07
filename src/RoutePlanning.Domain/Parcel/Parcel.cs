@@ -15,5 +15,4 @@ public class Parcel : AggregateRoot<Parcel>
     public float Weight { get; set; }
     public float Height { get; set; }
     public float Width { get; set; }
-
 }
