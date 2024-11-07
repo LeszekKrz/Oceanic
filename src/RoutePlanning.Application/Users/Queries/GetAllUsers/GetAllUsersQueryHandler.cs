@@ -14,7 +14,7 @@ public sealed class GetAllUsersQueryHandler : IQueryHandler<GetAllUsersQuery,IRe
     }
     public async Task<IReadOnlyList<User>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
     {
-        var authenticatedUser = await userRepository.GetUserById(request.user.Id, cancellationToken);
+        var authenticatedUser = await userRepository.getUserByNameOfAuthenticatedUser(request.user.Username, cancellationToken);
         if (authenticatedUser == null)
         {
             return new List<User>();

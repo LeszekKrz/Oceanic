@@ -17,7 +17,7 @@ public sealed class GetAllBookingsQueryHandler : IQueryHandler<GetAllBookingsQue
 
     public async Task<IReadOnlyList<Booking>> Handle(GetAllBookingsQuery request, CancellationToken cancellationToken)
     {
-        var user = await userRepository.GetUserById(request.user.Id, cancellationToken);
+        var user = await userRepository.getUserByNameOfAuthenticatedUser(request.user.Username, cancellationToken);
         if (user == null)
         {
             return new List<Booking>();

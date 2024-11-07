@@ -12,7 +12,7 @@ public sealed class PromoteUserQueryHandler : IQueryHandler<PromoteUserQuery, bo
     }
     public async Task<bool> Handle(PromoteUserQuery request, CancellationToken cancellationToken)
     {
-        var authenticatedUser = await userRepository.GetUserById(request.user.Id, cancellationToken);
+        var authenticatedUser = await userRepository.getUserByNameOfAuthenticatedUser(request.user.Username, cancellationToken);
         if (authenticatedUser == null)
         {
             return false;

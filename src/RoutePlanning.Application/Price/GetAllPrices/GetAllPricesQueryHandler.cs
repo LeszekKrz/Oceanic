@@ -14,7 +14,7 @@ public sealed class GetAllPricesQueryHandler : IQueryHandler<GetAllPricesQuery, 
     }
     public async Task<IReadOnlyList<Domain.Price.Price>> Handle(GetAllPricesQuery request, CancellationToken cancellationToken)
     {
-        var authenticatedUser = await userRepository.GetUserById(request.user.Id, cancellationToken);
+        var authenticatedUser = await userRepository.getUserByNameOfAuthenticatedUser(request.user.Username, cancellationToken);
         if (authenticatedUser == null)
         {
             return new List<Domain.Price.Price>();
