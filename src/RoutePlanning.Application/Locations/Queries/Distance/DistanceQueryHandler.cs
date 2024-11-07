@@ -1,8 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Netcompany.Net.Cqs.Queries;
+using RoutePlanning.Application.Locations.Commands.GetRoute;
 using RoutePlanning.Domain.Locations;
 using RoutePlanning.Domain.Locations.Services;
 using RoutePlanning.Infrastructure.Repositories;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace RoutePlanning.Application.Locations.Queries.Distance;
 
@@ -27,7 +29,7 @@ public sealed class DistanceQueryhandler : IQueryHandler<DistanceQuery, RouteDTO
         var route = shortestDistanceService.CalculateFastestPathPlane(source, destination);
 
         // get price
-        var price = 10.0f;
+        var price = 50.0f;
         // get time
         var time = 8;
 
