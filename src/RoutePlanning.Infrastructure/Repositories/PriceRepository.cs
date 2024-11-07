@@ -36,9 +36,18 @@ public class PriceRepository : IPriceRepository
         _context.Set<Price>().Update(existingPrice);
         await _context.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task<IReadOnlyList<Price>> getAllPrices(CancellationToken cancellationToken)
+    {
+        var prices = await Queryable.ToListAsync(cancellationToken);
+
+        return prices;
+    }
 }
 
 public interface IPriceRepository
 {
     public Task ChangePrice(string type, string weight, float newPrice, CancellationToken cancellationToken);
+
+    public Task<IReadOnlyList<Price>> getAllPrices(CancellationToken cancellationToken);
 }

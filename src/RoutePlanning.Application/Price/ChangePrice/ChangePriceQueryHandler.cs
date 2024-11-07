@@ -20,7 +20,7 @@ public sealed class ChangePriceQueryHandler :IQueryHandler<ChangePriceQuery, boo
         {
             return false;
         }
-        if (!authenticatedUser.IsAdmin && !authenticatedUser.IsEmployee)
+        if (!authenticatedUser.IsAdmin || !authenticatedUser.IsEmployee)
         {
             return false;
         }
