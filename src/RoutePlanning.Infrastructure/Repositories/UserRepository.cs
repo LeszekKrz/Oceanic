@@ -79,6 +79,23 @@ public class UserRepository : IUserRepository
         _context.Set<User>().Update(existingUser);
         await _context.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task RemoveUser(int id, CancellationToken cancellationToken)
+    {
+        var existingUser = await _context.Set<User>().FindAsync(new object[] { id }, cancellationToken);
+
+        if (existingUser == null)
+        {
+            throw new ArgumentException("User not found");
+        }
+
+        // Set the isEmployee property to true
+        existingUser.IsEmployee = true;
+
+        // Save the changes to the database
+        _context.Set<User>().Remove(existingUser);
+        await _context.SaveChangesAsync(cancellationToken);
+    }
 }
 
 public interface IUserRepository
@@ -94,4 +111,6 @@ public interface IUserRepository
     public Task<IReadOnlyList<User>> GetAllUsers(CancellationToken cancellationToken);
 
     public Task PromoteUser(int id, CancellationToken cancellationToken);
+
+    public Task RemoveUser(int id, CancellationToken cancellationToken);
 }
