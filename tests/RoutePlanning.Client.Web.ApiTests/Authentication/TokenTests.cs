@@ -18,7 +18,7 @@ public class TokenTests : IClassFixture<RoutePlanningApplicationFactory>
     public async void ShouldGetHelloWorld()
     {
         // Arrange
-        var url = factory.GetRoute<Program, RoutesController>(x => x.HelloWorld);
+        var url = factory.GetRoute<Program, RoutesController>(x => x.Health);
 
         // Act
         var request = new HttpRequestMessage(HttpMethod.Get, url);
@@ -28,6 +28,6 @@ public class TokenTests : IClassFixture<RoutePlanningApplicationFactory>
 
         // Assert
         var content = await response.Content.ReadAsStringAsync();
-        Assert.Equal("Hello World!", content);
+        Assert.Equal("Health Check Succesfull", content);
     }
 }
