@@ -20,6 +20,7 @@ public static class DatabaseInitialization
         {
             await SeedUsers(context);
             await SeedLocationsAndRoutes(context);
+            await SeedPrices(context);
 
             unitOfWork.Commit();
         }
@@ -52,15 +53,36 @@ public static class DatabaseInitialization
 
         var bob = new User("bob", User.ComputePasswordHash("!CapableStudentCries25"));
         await context.AddAsync(bob);
+    }
 
-        var price1 = new Price(">1kg", 50);
-        await context.AddAsync(price1);
+    private static async Task SeedPrices(RoutePlanningDatabaseContext context)
+    {
+        var price11 = new Price("small" ,">1kg", 50);
+        await context.AddAsync(price11);
 
-        var price2 = new Price(">5kg", 100);
-        await context.AddAsync(price2);
+        var price12 = new Price("medium", ">1kg", 50);
+        await context.AddAsync(price12);
 
-        var price3 = new Price("5kg<", 150);
-        await context.AddAsync(price3);
+        var price13 = new Price("large", ">1kg", 50);
+        await context.AddAsync(price13);
+
+        var price21 = new Price("small", ">5kg", 50);
+        await context.AddAsync(price21);
+
+        var price22 = new Price("medium", ">5kg", 50);
+        await context.AddAsync(price22);
+
+        var price23 = new Price("large", ">5kg", 50);
+        await context.AddAsync(price23);
+
+        var price31 = new Price("small", "5kg<", 50);
+        await context.AddAsync(price31);
+
+        var price32 = new Price("medium", "5kg<", 50);
+        await context.AddAsync(price32);
+
+        var price33 = new Price("large", "5kg<", 50);
+        await context.AddAsync(price33);
     }
 
     private static void CreateTwoWayConnection(Location locationA, Location locationB, int distance)

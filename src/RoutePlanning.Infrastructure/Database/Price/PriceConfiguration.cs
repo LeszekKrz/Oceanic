@@ -9,6 +9,7 @@ public sealed class PriceConfiguration : IEntityTypeConfiguration<Domain.Price.P
         builder.HasKey(x => x.Id);
 
         builder.Property(x => x.ParcelType);
+        builder.Property(x => x.ParcelWeight);
         builder.Property(x => x.Cost);
         
     }
