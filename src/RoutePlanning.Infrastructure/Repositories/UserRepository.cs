@@ -30,9 +30,19 @@ public class UserRepository : IUserRepository
 
         return user; 
     }
+
+    public Task<AuthenticatedUser?> createUser(User user, CancellationToken cancellationToken)
+    {
+        _context.Set<User>().Add(user);
+        var authenticatedUser = getAuthenticatedUser(user.Username, user.PasswordHash, cancellationToken);
+
+        return authenticatedUser;
+    }
 }
 
 public interface IUserRepository
 {
     public Task<AuthenticatedUser?> getAuthenticatedUser(string name, string hashedPassword, CancellationToken cancellationToken);
+
+    public Task<AuthenticatedUser?> createUser(User user, CancellationToken cancellationToken);
 }
