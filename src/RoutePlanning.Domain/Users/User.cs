@@ -12,6 +12,8 @@ public sealed class User : AggregateRoot<User>
     {
         Username = username;
         PasswordHash = passwordHash;
+        IsAdmin = true;
+        IsEmployee = true;
     }
     public User(string username, string passwordHash, string email, string address, string phoneNumber)
     {
@@ -20,6 +22,8 @@ public sealed class User : AggregateRoot<User>
         Email = email;
         Address = address;
         PhoneNumber = phoneNumber;
+        IsAdmin = false;
+        IsEmployee = false;
     }
 
     public string Username { get; set; }

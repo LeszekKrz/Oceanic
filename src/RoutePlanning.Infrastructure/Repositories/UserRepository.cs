@@ -35,6 +35,7 @@ public class UserRepository : IUserRepository
     public Task<AuthenticatedUser?> createUser(User user, CancellationToken cancellationToken)
     {
         _context.Set<User>().Add(user);
+        _context.SaveChangesAsync(cancellationToken);
         var authenticatedUser = getAuthenticatedUser(user.Username, user.PasswordHash, cancellationToken);
 
         return authenticatedUser;
