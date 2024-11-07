@@ -9,7 +9,11 @@ public class Price : AggregateRoot<Price>
         Cost = price;
     }
 
-    public string ParcelType { get;}
+    public string ParcelType { get; set; }
 
     public float Cost {get; set; }
+
+    protected Price(string parcelType) {
+        ParcelType = parcelType;
+    }
 }

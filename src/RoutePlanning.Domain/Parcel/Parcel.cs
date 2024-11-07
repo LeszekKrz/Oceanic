@@ -1,5 +1,4 @@
-﻿using System.Security.Cryptography.X509Certificates;
-using Netcompany.Net.DomainDrivenDesign.Models;
+﻿using Netcompany.Net.DomainDrivenDesign.Models;
 
 namespace RoutePlanning.Domain.Parcel;
 public class Parcel : AggregateRoot<Parcel>
