@@ -34,5 +34,6 @@ public static class ServiceCollectionExtensions
         serviceCollection.AddScoped<IUserRepository, UserRepository>();
         serviceCollection.AddScoped<IBookingRepository, BookingRepository>();
         serviceCollection.AddScoped<IFlightRepository, FlightRepository>();
+        serviceCollection.AddScoped<IPriceRepository, PriceRepository>();
     }
 }
