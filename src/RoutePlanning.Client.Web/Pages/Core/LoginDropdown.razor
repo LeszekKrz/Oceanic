@@ -1,0 +1,95 @@
+﻿@using MediatR
+@using RoutePlanning.Application.Users.Queries.AuthenticatedUser
+@using RoutePlanning.Client.Web.Authentication
+@inherits LayoutComponentBase
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<div class="dropdown">
+	<AuthorizeView>
+		<Authorized>
+			<span class="dropdown-toggle" @onclick="ToggleDropdown">Hello, @userName!</span>
+			<button class="btn btn-primary ml-2" @onclick="Logout">Logout</button>
+			<div class="dropdown-menu @(isOpen ? "show" : "")">
+				<!-- Additional dropdown menu content can go here if needed -->
+			</div>
+		</Authorized>
+		<NotAuthorized>
+			<a href="#" class="dropdown-toggle" @onclick="ToggleDropdown">Login</a>
+			<div class="dropdown-menu @(isOpen ? "show" : "")">
+				@if (ShowAuthError)
+				{
+					<div class="error text-danger m-2">Invalid login credentials</div>
+				}
+				<div class="form-group m-2">
+					<input type="text" placeholder="Username" class="form-control" @bind="Username">
+				</div>
+				<div class="form-group m-2">
+					<input type="password" class="form-control" placeholder="Password" @bind="Password">
+				</div>
+				<div class="form-group m-2">
+					<button class="btn btn-primary" @onclick="Login">Login</button>
+				</div>
+				<div class="dropdown-divider"></div>
+				<!-- Links for Reset Password and Create Account side by side without extra margin -->
+				<div class="d-flex justify-content-between px-2">
+					<a href="/reset-password" class="btn btn-link p-0 m-0">Reset Password</a>
+					<a href="/create-account" class="btn btn-link p-0 m-0">Create Account</a>
+				</div>
+			</div>
+		</NotAuthorized>
+	</AuthorizeView>
+</div>
+
+
+
+@code {
+	private bool isOpen = false;
+	private string Username { get; set; } = string.Empty;
+	private string Password { get; set; } = string.Empty;
+	private AuthenticatedUser? User { get; set; }
+	private bool ShowAuthError { get; set; } = false;
+	private string? userName;
+
+	[Inject]
+	private SimpleAuthenticationStateProvider AuthStateProvider { get; set; } = default!;
+
+	[Inject]
+	private IMediator Mediator { get; set; } = default!;
+
+	protected override async Task OnInitializedAsync()
+	{
+		var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+		var user = authState.User.Identity?.Name;
+		if (!string.IsNullOrEmpty(user))
+		{
+			userName = user;
+		}
+	}
+
+	private void ToggleDropdown()
+	{
+		isOpen = !isOpen;
+	}
+
+	private async Task Login()
+	{
+		User = await Mediator.Send(new AuthenticatedUserQuery(Username, Password), CancellationToken.None);
+
+		ShowAuthError = User is null;
+
+		if (User is not null)
+		{
+			await AuthStateProvider.SetAuthenticationStateAsync(new UserSession(User.Username));
+			userName = User.Username;
+			isOpen = false; // Close the dropdown on successful login
+		}
+	}
+
+	private async Task Logout()
+	{
+		await AuthStateProvider.ClearAuthenticationStateAsync();
+		userName = null;
+		ShowAuthError = false;
+		isOpen = false;
+	}
+}

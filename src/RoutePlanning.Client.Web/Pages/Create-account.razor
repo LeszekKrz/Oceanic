@@ -1,0 +1,81 @@
+﻿@page "/Create-account"
+@using RoutePlanning.Application.Users.Queries.CreateUser;
+@using MediatR;
+@inject IMediator Mediator
+
+<h3>Create an Account</h3>
+
+@if (!string.IsNullOrEmpty(Message))
+{
+	<div class="alert @(IsSuccess ? "alert-success" : "alert-danger")">@Message</div>
+}
+
+<div class="create-account-form">
+	<!-- Username Field -->
+	<div class="form-group">
+		<label for="username">Username</label>
+		<input type="text" id="username" class="form-control" @bind="Username" required />
+	</div>
+
+	<!-- Password Field -->
+	<div class="form-group">
+		<label for="password">Password</label>
+		<input type="password" id="password" class="form-control" @bind="Password" required />
+	</div>
+
+	<!-- Email Field -->
+	<div class="form-group">
+		<label for="email">Email</label>
+		<input type="email" id="email" class="form-control" @bind="Email" required />
+	</div>
+
+	<!-- Address Field -->
+	<div class="form-group">
+		<label for="address">Address</label>
+		<input type="text" id="address" class="form-control" @bind="Address" required />
+	</div>
+
+	<!-- Phone Number Field -->
+	<div class="form-group">
+		<label for="phone">Phone Number</label>
+		<input type="tel" id="phone" class="form-control" @bind="PhoneNumber" required />
+	</div>
+
+	<button class="btn btn-primary" @onclick="CreateAccount">Create Account</button>
+</div>
+
+@code {
+	private string Username { get; set; } = string.Empty;
+	private string Password { get; set; } = string.Empty;
+	private string Email { get; set; } = string.Empty;
+	private string Address { get; set; } = string.Empty;
+	private string PhoneNumber { get; set; } = string.Empty;
+	private string? Message { get; set; }
+	private bool IsSuccess { get; set; }
+
+	private async Task CreateAccount()
+	{
+		try
+		{
+			// Send only username and password to the backend using CreateUserQuery
+			var query = new CreateUserQuery(Username, Password);
+			var authenticatedUser = await Mediator.Send(query);
+
+			if (authenticatedUser != null)
+			{
+				IsSuccess = true;
+				Message = "Account created successfully!";
+			}
+			else
+			{
+				IsSuccess = false;
+				Message = "Failed to create account. Username might already be taken.";
+			}
+		}
+		catch (Exception ex)
+		{
+			IsSuccess = false;
+			Message = $"Error: {ex.Message}";
+		}
+	}
+}

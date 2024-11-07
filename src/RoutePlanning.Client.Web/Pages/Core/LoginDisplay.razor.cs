@@ -2,12 +2,11 @@
 using MediatR;
 using RoutePlanning.Application.Users.Queries.AuthenticatedUser;
 using RoutePlanning.Client.Web.Authentication;
-using RoutePlanning.Domain.Users;
 
 namespace RoutePlanning.Client.Web.Pages.Core;
 
 public sealed partial class LoginDisplay
-{
+{/*
     private string Username { get; set; } = string.Empty;
     private string Password { get; set; } = string.Empty;
     private AuthenticatedUser? User { get; set; }
@@ -36,5 +35,5 @@ public sealed partial class LoginDisplay
         await AuthStateProvider.ClearAuthenticationStateAsync();
 
         ShowAuthError = false;
-    }
+    }*/
 }

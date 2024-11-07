@@ -1,32 +1,396 @@
 ﻿@page "/"
+@using System.ComponentModel.DataAnnotations
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
-<PageTitle>RoutePlanner</PageTitle>
+<div class="main-container">
+    <header class="header">
+        <h1>Welcome to Oceanic Airlines</h1>
+        <p>The quickest delivery in Africa</p>
+    </header>
 
-<h1>RoutePlanner</h1>
+    <div class="form-container">
+        @if (!string.IsNullOrEmpty(validationSummary))
+        {
+            <div class="validation-popup">
+                <p>@validationSummary</p>
+            </div>
+        }
+        <div class="input-row">
+            <!-- From Location with Autocomplete -->
+            <div class="form-group">
+                <label for="from">From</label>
+                <input id="from" type="text" class="form-control" @bind="FromLocation" @oninput="OnFromInput">
+                <div class="autocomplete-list" style="position:relative;">
+                    @foreach (var city in FilteredFromCities)
+                    {
+                        <div class="autocomplete-item" @onclick="() => SelectFromCity(city)">@city</div>
+                    }
+                </div>
+            </div>
 
-<p>
-    This application is an <i>Accelerator</i> to get you started on a route-planning application.
-    <br />
-    It also serves as an entry point to get introduced to the <a target="_blank" href="https://source.netcompany.com/tfs/Foundations/DOTNET">Netcompany Foundation</a>.
-</p>
+            <!-- To Location with Autocomplete -->
+            <div class="form-group">
+                <label for="to">To</label>
+                <input id="to" type="text" class="form-control" @bind="ToLocation" @oninput="OnToInput">
+                <div class="autocomplete-list" style="position:relative;">
+                    @foreach (var city in FilteredToCities)
+                    {
+                        <div class="autocomplete-item" @onclick="() => SelectToCity(city)">@city</div>
+                    }
+                </div>
+            </div>
 
-<h4>Getting started</h4>
-<ol>
-    <li>Try the <a href="distancecalculator">Distance Calculator</a> and the authentication mentioned below!</li>
-    <li>Read the <a href="documentation">technical documentation</a> to get an overview of the technical architecture in this accelerator.</li>
-    <li>Browse the code to figure out the details and make your own changes.</li>
-</ol>
+            <div class="form-group">
+                <label for="weight">Weight (kg)</label>
+                <input id="weight" type="number" class="form-control" @bind="Weight" step="0.01" min="0">
+            </div>
+            <div class="form-group">
+                <label for="size">Size</label>
+                <select id="size" class="form-control" @bind="Size">
+                    <option value="" disabled selected>Select Size</option>
+                    <option value="Small">Small</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Large">Large</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="type">Type</label>
+                <select id="type" class="form-control" @bind="Type">
+                    <option value="" disabled selected>Select Type</option>
+                    <option value="Normal">Normal</option>
+                    <option value="Cautious Parcels">Cautious Parcels</option>
+                    <option value="Refrigerated Goods">Refrigerated Goods</option>
+                    <option value="Weapons">Weapons</option>
+                </select>
+            </div>
+        </div>
 
-<p>Good luck :)</p>
+        <div class="checkbox-row">
+            <label>
+                <input type="checkbox" @bind="Cheapest" @onclick="ToggleCheapest"> Cheapest
+            </label>
+            <label>
+                <input type="checkbox" @bind="Fastest" @onclick="ToggleFastest"> Fastest
+            </label>
+            <div class="conditions-dropdown-container">
+                <button type="button" class="conditions-dropdown-toggle" @onclick="ToggleConditionsDropdown">Conditions</button>
+                <div class="conditions-dropdown-menu @(isConditionsDropdownOpen ? "show" : "")">
+                    <label><input type="checkbox" @bind="Vehicles"> Vehicles</label>
+                    <label><input type="checkbox" @bind="Ships"> Ships</label>
+                    <label><input type="checkbox" @bind="Planes"> Planes</label>
+                </div>
+            </div>
+            <button type="button" class="find-button" @onclick="ValidateForm">Find</button>
+        </div>
+    </div>
+</div>
+
+<!-- Container for image and result box -->
+<div class="image-and-result-container">
+    <div class="image-container">
+        <img src="/images/map.png" alt="Map of Africa" class="map-image">
+    </div>
+
+    @if (showResults)
+    {
+        <div class="results-container">
+            @foreach (var result in Results)
+            {
+                <div class="result-box @(result.ShowDetails ? "expanded" : "")">
+                    <div class="result-content">
+                        <div class="left-column">
+                            <div class="result-info">
+                                <span class="label">Departure</span>
+                                <span class="value">@result.Departure.ToString("dd/MM HH:mm")</span>
+                            </div>
+                            <div class="result-info">
+                                <span class="label">Arrival</span>
+                                <span class="value">@result.Arrival.ToString("dd/MM HH:mm")</span>
+                            </div>
+                        </div>
+                        <div class="right-column">
+                            <div class="result-info">
+                                <span class="label">Price</span>
+                                <span class="value">$@result.Price</span>
+                            </div>
+                            <div class="result-buttons">
+                                <button class="btn btn-outline-light details-button" @onclick="() => ToggleDetails(result)">Details</button>
+                                <button class="btn btn-pink book-button" @onclick=" CheckUserAndPerformAction">Book</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (result.ShowDetails)
+                    {
+                        <div class="route-details">
+                            <h5>Route</h5>
+                            <ul>
+                                @foreach (var step in result.Route)
+                                {
+                                    <li>
+                                        <img src="@(step.TransportType == "Plane" ? "/images/plane-icon.svg" 
+                                                  : step.TransportType == "Truck" ? "/images/truck-icon.svg" 
+                                                  : step.TransportType == "Ship" ? "/images/ship-icon.svg" 
+                                                  : "/images/default-icon.svg")"
+                                             alt="@step.TransportType" class="transport-icon" />
+                                        @step.Location - @step.ArrivalTime.ToString("dd/MM HH:mm")
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    }
+
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<div>
+    @if (showLoginPrompt)
+    {
+        <div class="popup-overlay">
+            <div class="popup">
+                <p>Please log in to book this item.</p>
+                <button @onclick="ClosePopup">Close</button>
+            </div>
+        </div>
+    }
+
+    <!-- Pop-up for booking confirmation for authenticated users -->
+    @if (showConfirmation)
+    {
+        <div class="popup-overlay">
+            <div class="popup">
+                <p>Booking confirmed! Thank you for your reservation.</p>
+                <button @onclick="ClosePopup">Close</button>
+            </div>
+        </div>
+    }
+</div>
 
 
-<h5>Authentication</h5>
-<p>You can try the login in the top right corner with the following credentials:</p>
-<ul class="mb-4">
-    <li>Username: alice</li>
-    <li>Password: alice123!</li>
-</ul>
+@code {
+	public string FromLocation { get; set; } = string.Empty;
+	public string ToLocation { get; set; } = string.Empty;
 
-<AuthorizeView>
-    <span class="alert alert-success"><span class="oi oi-lock-locked" aria-hidden="true"></span> This content requires authentication. You are logged in as @context.User.Identity?.Name</span>
-</AuthorizeView>
+    private List<string> AvailableCities = new List<string>
+    {
+        "Addis Abeba", "Amatave", "Bahr El Ghazal", "Cairo", "Congo", "Dakar", "Darfur",
+        "De Kanariske Øer", "Dragebjerget", "Guld-kysten", "Hvalbugten", "Kabalo", "Kap Guardafui",
+        "Kap St. Marie", "Kapstaden", "Luanda", "Marrakesh", "Mocambique", "Omdurman", "Sahara",
+        "Sierra Leone", "Slave-kysten", "St. Helena", "Suakin", "Tanger", "Timbuktu", "Tripoli",
+        "Tunis", "Victoria-faldene", "Victoria-søen", "Wadai", "Zanzibar"
+    };
+
+    public List<string> FilteredFromCities { get; set; } = new List<string>();
+    public List<string> FilteredToCities { get; set; } = new List<string>();
+
+
+	public float Weight { get; set; }
+	public string Size { get; set; } = string.Empty;
+    // Conditions dropdown options
+	public bool Cheapest { get; set; } = false;
+	public bool Fastest { get; set; } = false;
+    public string Type { get; set; } = "Normal";
+
+	public bool Vehicles { get; set; } = true;
+	public bool Ships { get; set; } = true;
+	public bool Planes { get; set; } = true;
+	private bool isConditionsDropdownOpen = false;
+
+	// Validation flags
+    private bool isFromValid = true;
+    private bool isToValid = true;
+    private bool isWeightValid = true;
+    private bool isSizeValid = true;
+    private bool isTypeValid = true;
+    private bool isCheapestOrFastestValid = true;
+    private bool isConditionsValid = true;
+    private string validationSummary = string.Empty;
+    
+
+	private List<Result> Results { get; set; } = new List<Result>();
+	private Random random = new Random();
+	private bool showResults = false; // Controls visibility of the results
+
+    private bool showLoginPrompt = false;
+    private bool showConfirmation = false;
+
+	// Result class definition
+    public class Result
+    {
+        public DateTime Departure { get; set; }
+        public DateTime Arrival { get; set; }
+        public decimal Price { get; set; }
+        public List<RouteStep> Route { get; set; } = new List<RouteStep>();
+        public bool ShowDetails { get; set; } = false; // Controls if details are shown
+    }
+
+
+    public class RouteStep
+    {
+        public string Location { get; set; } = string.Empty;
+        public DateTime ArrivalTime { get; set; }
+        public string TransportType { get; set; } = "Plane";
+    }
+
+
+    private void GenerateResults(int count)
+    {
+        Results.Clear();
+        for (int i = 0; i < count; i++)
+        {
+            var departureTime = DateTime.Now.AddHours(random.Next(1, 24)); // Random departure within the next day
+            var route = GenerateRouteSteps(departureTime);
+            var flights = route.Count - 1;
+
+            var result = new Result
+            {
+                Departure = departureTime,
+                Arrival = departureTime.AddHours(8 * flights), // Total of 32 hours for four stops
+                Price = random.Next(40, 61) * flights,
+                Route = GenerateRouteSteps(departureTime) // Generate route steps
+            };
+            Results.Add(result);
+        }
+    }
+
+    private List<RouteStep> GenerateRouteSteps(DateTime startTime)
+    {
+        var routeSteps = new List<RouteStep>
+        {
+            new RouteStep { Location = "Tanger", ArrivalTime = startTime },
+            new RouteStep { Location = "Tripoli", ArrivalTime = startTime.AddHours(8) },
+            new RouteStep { Location = "Darfur", ArrivalTime = startTime.AddHours(16) },
+            new RouteStep { Location = "Suakin", ArrivalTime = startTime.AddHours(24) },
+            new RouteStep { Location = "Cairo", ArrivalTime = startTime.AddHours(32) }
+        };
+
+        return routeSteps;
+    }
+
+    private void ToggleDetails(Result result)
+    {
+        result.ShowDetails = !result.ShowDetails;
+    }
+
+	private void ValidateForm()
+	{
+		validationSummary = string.Empty;
+
+		// Reset all validation flags
+		isFromValid = !string.IsNullOrWhiteSpace(FromLocation);
+		isToValid = !string.IsNullOrWhiteSpace(ToLocation) && FromLocation != ToLocation;
+		isWeightValid = Weight > 0;
+		isSizeValid = !string.IsNullOrWhiteSpace(Size);
+		isTypeValid = !string.IsNullOrWhiteSpace(Type);
+		isCheapestOrFastestValid = Cheapest || Fastest;
+		isConditionsValid = Vehicles || Ships || Planes;
+
+		// If all fields are valid, generate results and display them
+		if (isFromValid && isToValid && isWeightValid && isSizeValid && isTypeValid && isCheapestOrFastestValid && isConditionsValid)
+		{
+			GenerateResults(3); // Generate 3 result boxes as an example
+			showResults = true; // Show the results
+		}
+		else
+		{
+			showResults = false; // Hide results if validation fails
+
+			// Add to validation summary if any field is invalid
+			if (!isFromValid) validationSummary += "Please enter a valid starting location.\n";
+			if (!isToValid) validationSummary += "Please enter a valid destination different from 'From'.\n";
+			if (!isWeightValid) validationSummary += "Please enter a weight greater than zero.\n";
+			if (!isSizeValid) validationSummary += "Please select a size.\n";
+			if (!isTypeValid) validationSummary += "Please select a package type.\n";
+			if (!isCheapestOrFastestValid) validationSummary += "Please select either 'Cheapest' or 'Fastest'.\n";
+			if (!isConditionsValid) validationSummary += "Please select at least one condition.\n";
+		}
+	}
+
+    private async Task CheckUserAndPerformAction()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity != null && user.Identity.IsAuthenticated)
+        {
+            showConfirmation = true;  // Show confirmation for authenticated users
+        }
+        else
+        {
+            showLoginPrompt = true;  // Show login prompt for unauthenticated users
+        }
+    }
+
+    private void ClosePopup()
+    {
+        showLoginPrompt = false;
+        showConfirmation = false;
+    }
+
+	private void ToggleConditionsDropdown()
+	{
+		isConditionsDropdownOpen = !isConditionsDropdownOpen;
+	}
+
+	private void ToggleCheapest()
+	{
+		if (!Cheapest)
+		{
+			Cheapest = true;
+			Fastest = false;
+		}
+		else
+		{
+			Cheapest = false;
+		}
+		StateHasChanged();
+	}
+
+	private void ToggleFastest()
+	{
+		if (!Fastest)
+		{
+			Fastest = true;
+			Cheapest = false;
+		}
+		else
+		{
+			Fastest = false;
+		}
+		StateHasChanged();
+	}
+
+    // Autocomplete logic for From and To inputs
+	private void OnFromInput(ChangeEventArgs e)
+	{
+		FromLocation = e.Value?.ToString() ?? string.Empty; // Handle null case for e.Value
+		FilteredFromCities = AvailableCities
+			.Where(city => city.Contains(FromLocation, StringComparison.OrdinalIgnoreCase))
+			.ToList();
+	}
+
+	private void OnToInput(ChangeEventArgs e)
+	{
+		ToLocation = e.Value?.ToString() ?? string.Empty; // Handle null case for e.Value
+		FilteredToCities = AvailableCities
+			.Where(city => city.Contains(ToLocation, StringComparison.OrdinalIgnoreCase))
+			.ToList();
+	}
+
+    private void SelectFromCity(string city)
+    {
+        FromLocation = city;
+        FilteredFromCities.Clear();
+    }
+
+    private void SelectToCity(string city)
+    {
+        ToLocation = city;
+        FilteredToCities.Clear();
+    }
+
+	//This section is made for the route boxes.
+}
