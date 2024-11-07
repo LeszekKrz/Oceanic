@@ -51,6 +51,9 @@ public static class DatabaseInitialization
         var alice = new User("alice", User.ComputePasswordHash("alice123!"));
         await context.AddAsync(alice);
 
+        var admin = new User("admin", User.ComputePasswordHash("admin"));
+        await context.AddAsync(admin);
+
         var bob = new User("bob", User.ComputePasswordHash("!CapableStudentCries25"));
         await context.AddAsync(bob);
     }

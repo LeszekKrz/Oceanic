@@ -8,7 +8,7 @@ public sealed class RemoveUserQueryHandler(IUserRepository userRepository) : IQu
 
     public async Task<bool> Handle(RemoveUserQuery request, CancellationToken cancellationToken)
     {
-        var authenticatedUser = await UserRepository.GetUserById(request.user.Id, cancellationToken);
+        var authenticatedUser = await UserRepository.getUserByNameOfAuthenticatedUser(request.user.Username, cancellationToken);
         if (authenticatedUser == null)
         {
             return false;
