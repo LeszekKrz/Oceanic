@@ -1,6 +1,55 @@
-﻿@page "/employee_view"
-<h3>Employee_view</h3>
+﻿@page "/employee-view"
+
+<h3>Employee View - Pricing Matrix</h3>
+
+<p>Here you can view and update the pricing for different package sizes and weight categories in $.</p>
+
+<table class="table table-bordered">
+    <thead>
+    <tr>
+        <th>Size</th>
+        @foreach (var weightCategory in WeightCategories)
+        {
+            <th>@weightCategory</th>
+        }
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var size in Sizes)
+    {
+        <tr>
+            <td>@size</td>
+            @foreach (var weightCategory in WeightCategories)
+            {
+                <td>
+                    <input type="number" @bind="PriceMatrix[size][weightCategory]" />
+                </td>
+            }
+        </tr>
+    }
+    </tbody>
+</table>
+
+
 
 @code {
-    
+    // Define sizes and weight categories as lists -- <button class="btn btn-primary" @onclick="UpdatePrices">Update Prices</button>
+    private List<string> Sizes = new() { "A", "B", "C" };
+    private List<string> WeightCategories = new() { "<1kg", "1-5kg", ">5kg" };
+
+    // Dictionary to hold the price matrix data
+    private Dictionary<string, Dictionary<string, decimal>> PriceMatrix = new()
+    {
+        { "A", new Dictionary<string, decimal> { { "<1kg", 40 }, { "1-5kg", 60 }, { ">5kg", 80 } } },
+        { "B", new Dictionary<string, decimal> { { "<1kg", 48 }, { "1-5kg", 68 }, { ">5kg", 88 } } },
+        { "C", new Dictionary<string, decimal> { { "<1kg", 80 }, { "1-5kg", 100 }, { ">5kg", 120 } } }
+    };
+
+    /*private async Task UpdatePrices()
+    {
+        // Logic to update prices in the backend using a query.
+        // Placeholder for the update query or API call to send updated prices.
+        Console.WriteLine("Prices updated!");
+        // Replace this with actual logic to send data to the backend
+    }*/
 }

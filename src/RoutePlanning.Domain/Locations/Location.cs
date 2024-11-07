@@ -9,6 +9,7 @@ public sealed class Location : AggregateRoot<Location>
     public Location(string name)
     {
         Name = name;
+        airReachable = true;
     }
 
     public string Name { get; set; }

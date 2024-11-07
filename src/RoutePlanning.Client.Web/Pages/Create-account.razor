@@ -72,10 +72,11 @@
 				Message = "Failed to create account. Username might already be taken.";
 			}
 		}
-		catch (Exception ex)
-		{
-			IsSuccess = false;
-			Message = $"Error: {ex.Message}";
-		}
+        catch (Exception ex)
+        {
+            IsSuccess = false;
+            Message = $"Error: {ex.Message}\nDetails: {ex.StackTrace}";
+        }
+
 	}
 }

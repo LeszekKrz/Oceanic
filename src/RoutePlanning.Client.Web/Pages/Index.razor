@@ -1,5 +1,6 @@
 ﻿@page "/"
 @using System.ComponentModel.DataAnnotations
+@using RoutePlanning.Application.Locations.Queries.Distance
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
 <div class="main-container">
@@ -80,7 +81,8 @@
                     <label><input type="checkbox" @bind="Planes"> Planes</label>
                 </div>
             </div>
-            <button type="button" class="find-button" @onclick="ValidateForm">Find</button>
+			<button class="find-button" @onclick="() => ValidateForm()">Find</button>
+
         </div>
     </div>
 </div>
@@ -173,8 +175,10 @@
 @code {
 	public string FromLocation { get; set; } = string.Empty;
 	public string ToLocation { get; set; } = string.Empty;
+	private DistanceCalculator distanceCalculator = new DistanceCalculator();
 
-    private List<string> AvailableCities = new List<string>
+
+	private List<string> AvailableCities = new List<string>
     {
         "Addis Abeba", "Amatave", "Bahr El Ghazal", "Cairo", "Congo", "Dakar", "Darfur",
         "De Kanariske Øer", "Dragebjerget", "Guld-kysten", "Hvalbugten", "Kabalo", "Kap Guardafui",
@@ -183,16 +187,16 @@
         "Tunis", "Victoria-faldene", "Victoria-søen", "Wadai", "Zanzibar"
     };
 
-    public List<string> FilteredFromCities { get; set; } = new List<string>();
-    public List<string> FilteredToCities { get; set; } = new List<string>();
+	public List<string> FilteredFromCities { get; set; } = new List<string>();
+	public List<string> FilteredToCities { get; set; } = new List<string>();
 
 
 	public float Weight { get; set; }
 	public string Size { get; set; } = string.Empty;
-    // Conditions dropdown options
+	// Conditions dropdown options
 	public bool Cheapest { get; set; } = false;
 	public bool Fastest { get; set; } = false;
-    public string Type { get; set; } = "Normal";
+	public string Type { get; set; } = "Normal";
 
 	public bool Vehicles { get; set; } = true;
 	public bool Ships { get; set; } = true;
@@ -200,65 +204,65 @@
 	private bool isConditionsDropdownOpen = false;
 
 	// Validation flags
-    private bool isFromValid = true;
-    private bool isToValid = true;
-    private bool isWeightValid = true;
-    private bool isSizeValid = true;
-    private bool isTypeValid = true;
-    private bool isCheapestOrFastestValid = true;
-    private bool isConditionsValid = true;
-    private string validationSummary = string.Empty;
-    
+	private bool isFromValid = true;
+	private bool isToValid = true;
+	private bool isWeightValid = true;
+	private bool isSizeValid = true;
+	private bool isTypeValid = true;
+	private bool isCheapestOrFastestValid = true;
+	private bool isConditionsValid = true;
+	private string validationSummary = string.Empty;
+
 
 	private List<Result> Results { get; set; } = new List<Result>();
 	private Random random = new Random();
 	private bool showResults = false; // Controls visibility of the results
 
-    private bool showLoginPrompt = false;
-    private bool showConfirmation = false;
+	private bool showLoginPrompt = false;
+	private bool showConfirmation = false;
 
 	// Result class definition
-    public class Result
-    {
-        public DateTime Departure { get; set; }
-        public DateTime Arrival { get; set; }
-        public decimal Price { get; set; }
-        public List<RouteStep> Route { get; set; } = new List<RouteStep>();
-        public bool ShowDetails { get; set; } = false; // Controls if details are shown
-    }
+	public class Result
+	{
+		public DateTime Departure { get; set; }
+		public DateTime Arrival { get; set; }
+		public float Price { get; set; }
+		public List<RouteStep> Route { get; set; } = new List<RouteStep>();
+		public bool ShowDetails { get; set; } = false; // Controls if details are shown
+	}
 
 
-    public class RouteStep
-    {
-        public string Location { get; set; } = string.Empty;
-        public DateTime ArrivalTime { get; set; }
-        public string TransportType { get; set; } = "Plane";
-    }
+	public class RouteStep
+	{
+		public string Location { get; set; } = string.Empty;
+		public DateTime ArrivalTime { get; set; }
+		public string TransportType { get; set; } = "Plane";
+	}
 
 
-    private void GenerateResults(int count)
-    {
-        Results.Clear();
-        for (int i = 0; i < count; i++)
-        {
-            var departureTime = DateTime.Now.AddHours(random.Next(1, 24)); // Random departure within the next day
-            var route = GenerateRouteSteps(departureTime);
-            var flights = route.Count - 1;
+	private void GenerateResults(int count)
+	{
+		Results.Clear();
+		for (int i = 0; i < count; i++)
+		{
+			var departureTime = DateTime.Now.AddHours(random.Next(1, 24)); // Random departure within the next day
+			var route = GenerateRouteSteps(departureTime);
+			var flights = route.Count - 1;
 
-            var result = new Result
+			var result = new Result
             {
                 Departure = departureTime,
                 Arrival = departureTime.AddHours(8 * flights), // Total of 32 hours for four stops
                 Price = random.Next(40, 61) * flights,
                 Route = GenerateRouteSteps(departureTime) // Generate route steps
             };
-            Results.Add(result);
-        }
-    }
+			Results.Add(result);
+		}
+	}
 
-    private List<RouteStep> GenerateRouteSteps(DateTime startTime)
-    {
-        var routeSteps = new List<RouteStep>
+	private List<RouteStep> GenerateRouteSteps(DateTime startTime)
+	{
+		var routeSteps = new List<RouteStep>
         {
             new RouteStep { Location = "Tanger", ArrivalTime = startTime },
             new RouteStep { Location = "Tripoli", ArrivalTime = startTime.AddHours(8) },
@@ -267,15 +271,15 @@
             new RouteStep { Location = "Cairo", ArrivalTime = startTime.AddHours(32) }
         };
 
-        return routeSteps;
-    }
+		return routeSteps;
+	}
 
-    private void ToggleDetails(Result result)
-    {
-        result.ShowDetails = !result.ShowDetails;
-    }
+	private void ToggleDetails(Result result)
+	{
+		result.ShowDetails = !result.ShowDetails;
+	}
 
-	private void ValidateForm()
+	private async Task ValidateForm()
 	{
 		validationSummary = string.Empty;
 
@@ -288,11 +292,49 @@
 		isCheapestOrFastestValid = Cheapest || Fastest;
 		isConditionsValid = Vehicles || Ships || Planes;
 
-		// If all fields are valid, generate results and display them
+		// If all fields are valid, proceed with calculation
 		if (isFromValid && isToValid && isWeightValid && isSizeValid && isTypeValid && isCheapestOrFastestValid && isConditionsValid)
 		{
-			GenerateResults(3); // Generate 3 result boxes as an example
-			showResults = true; // Show the results
+			// Call CalculateDistance and check for null result
+			var routeDto = await distanceCalculator.CalculateDistance(
+				from: FromLocation,
+				to: ToLocation,
+				weight: Weight,
+				size: Size,
+				type: Type,
+				fast: Fastest,
+				car: Vehicles,
+				ship: Ships
+			);
+
+			if (routeDto != null)
+			{
+				var departureTime = DateTime.Now;
+				var arrivalTime = departureTime.AddMinutes(routeDto.time); // Calculate Arrival based on travel time in minutes
+
+				// Create a new Result object based on the RouteDTO result
+				Results.Clear(); // Clear previous results, if any
+				Results.Add(new Result
+					{
+						Departure = departureTime,
+						Arrival = arrivalTime,
+						Price = routeDto.cost,
+						Route = routeDto.routeSegments.Select(segment => new RouteStep
+						{
+							Location = segment.Item2, // Destination location from the segment
+							ArrivalTime = departureTime.AddMinutes(segment.Item3), // Add travel time to departure for each segment
+							TransportType = segment.Item1 // Transport type from the segment
+						}).ToList()
+					});
+
+				showResults = true; // Display the results
+			}
+			else
+			{
+				// Handle null RouteDTO result by updating validationSummary or providing feedback
+				validationSummary = "No route data available for the selected options. Please adjust your selection.";
+				showResults = false;
+			}
 		}
 		else
 		{
@@ -301,13 +343,14 @@
 			// Add to validation summary if any field is invalid
 			if (!isFromValid) validationSummary += "Please enter a valid starting location.\n";
 			if (!isToValid) validationSummary += "Please enter a valid destination different from 'From'.\n";
-			if (!isWeightValid) validationSummary += "Please enter a weight greater than zero.\n";
+			if (!isWeightValid) validationSummary += "Please enter a weight greater than zero and smaller than 20.\n";
 			if (!isSizeValid) validationSummary += "Please select a size.\n";
 			if (!isTypeValid) validationSummary += "Please select a package type.\n";
 			if (!isCheapestOrFastestValid) validationSummary += "Please select either 'Cheapest' or 'Fastest'.\n";
 			if (!isConditionsValid) validationSummary += "Please select at least one condition.\n";
 		}
 	}
+
 
     private async Task CheckUserAndPerformAction()
     {

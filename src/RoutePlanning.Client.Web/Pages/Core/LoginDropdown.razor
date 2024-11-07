@@ -5,46 +5,51 @@
 @inherits LayoutComponentBase
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
-<div class="dropdown">
-	<AuthorizeView>
-		<Authorized>
-			<span class="dropdown-toggle" @onclick="ToggleDropdown">Hello, @userName!</span>
-			<button class="btn btn-primary ml-2" @onclick="Logout">Logout</button>
-			<div class="dropdown-menu @(isOpen ? "show" : "")">
-				<!-- Additional dropdown menu content can go here if needed -->
-			</div>
-		</Authorized>
-		<NotAuthorized>
-			<a href="#" class="dropdown-toggle" @onclick="ToggleDropdown">Login</a>
-			<div class="dropdown-menu @(isOpen ? "show" : "")">
-				@if (ShowAuthError)
+<div @onclick="HandleOutsideClick" style="position: relative;">
+	<div class="dropdown">
+		<AuthorizeView>
+			<Authorized>
+				<span class="dropdown-toggle" @onclick="ToggleDropdown">Hello, @userName!</span>
+				<button class="btn btn-primary ml-2" @onclick="Logout">Logout</button>
+				@if (isOpen)
 				{
-					<div class="error text-danger m-2">Invalid login credentials</div>
+					<div class="dropdown-menu show" @onclick:stopPropagation="true">
+						<!-- Additional dropdown menu content can go here if needed -->
+					</div>
 				}
-				<div class="form-group m-2">
-					<input type="text" placeholder="Username" class="form-control" @bind="Username">
-				</div>
-				<div class="form-group m-2">
-					<input type="password" class="form-control" placeholder="Password" @bind="Password">
-				</div>
-				<div class="form-group m-2">
-					<button class="btn btn-primary" @onclick="Login">Login</button>
-				</div>
-				<div class="dropdown-divider"></div>
-				<!-- Links for Reset Password and Create Account side by side without extra margin -->
-				<div class="d-flex justify-content-between px-2">
-					<a href="/reset-password" class="btn btn-link p-0 m-0">Reset Password</a>
-					<a href="/create-account" class="btn btn-link p-0 m-0">Create Account</a>
-				</div>
-			</div>
-		</NotAuthorized>
-	</AuthorizeView>
+			</Authorized>
+			<NotAuthorized>
+				<a href="#" class="dropdown-toggle" @onclick="ToggleDropdown">Login</a>
+				@if (isOpen)
+				{
+					<div class="dropdown-menu show" @onclick:stopPropagation="true">
+						@if (ShowAuthError)
+						{
+							<div class="error text-danger m-2">Invalid login credentials</div>
+						}
+						<div class="form-group m-2">
+							<input type="text" placeholder="Username" class="form-control" @bind="Username">
+						</div>
+						<div class="form-group m-2">
+							<input type="password" class="form-control" placeholder="Password" @bind="Password">
+						</div>
+						<div class="form-group m-2">
+							<button class="btn btn-primary" @onclick="Login">Login</button>
+						</div>
+						<div class="dropdown-divider"></div>
+						<div class="d-flex justify-content-between px-2">
+							<a href="/create-account" class="btn btn-link p-0 m-0" @onclick="CloseDropdown">Create Account</a>
+						</div>
+					</div>
+				}
+			</NotAuthorized>
+		</AuthorizeView>
+	</div>
 </div>
-
-
 
 @code {
 	private bool isOpen = false;
+	private bool ignoreNextClick = false;
 	private string Username { get; set; } = string.Empty;
 	private string Password { get; set; } = string.Empty;
 	private AuthenticatedUser? User { get; set; }
@@ -53,7 +58,6 @@
 
 	[Inject]
 	private SimpleAuthenticationStateProvider AuthStateProvider { get; set; } = default!;
-
 	[Inject]
 	private IMediator Mediator { get; set; } = default!;
 
@@ -69,13 +73,32 @@
 
 	private void ToggleDropdown()
 	{
+		ignoreNextClick = true; // Ignore the next outside click event
 		isOpen = !isOpen;
+	}
+
+	private void HandleOutsideClick()
+	{
+		if (ignoreNextClick)
+		{
+			ignoreNextClick = false; // Reset the flag and ignore this click
+			return;
+		}
+
+		if (isOpen)
+		{
+			isOpen = false;
+		}
+	}
+
+	private void CloseDropdown()
+	{
+		isOpen = false;
 	}
 
 	private async Task Login()
 	{
 		User = await Mediator.Send(new AuthenticatedUserQuery(Username, Password), CancellationToken.None);
-
 		ShowAuthError = User is null;
 
 		if (User is not null)
@@ -94,3 +117,4 @@
 		isOpen = false;
 	}
 }
+
