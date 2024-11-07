@@ -15,18 +15,5 @@ public sealed class BookingConfiguration : IEntityTypeConfiguration<Domain.Booki
         builder.Property(x => x.Destination).IsRequired();
         builder.Property(x => x.Price);
         builder.Property(x => x.BookedByUserId).IsRequired();
-
-        builder.HasOne(b => b.Email)
-                .WithOne()
-                .HasForeignKey<Domain.Email.Email>(e => e.BookingReference);
-
-        builder.HasOne(b => b.Parcel)
-            .WithOne()
-            .HasForeignKey<Domain.Parcel.Parcel>(p => p.BookingReference);
-
-        builder.HasOne<User>()
-            .WithOne()
-            .HasForeignKey<Domain.Booking.Booking>(b => b.BookedByUserId)
-            .OnDelete(DeleteBehavior.Restrict);
     }
 }

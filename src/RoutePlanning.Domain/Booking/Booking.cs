@@ -11,8 +11,6 @@ public sealed class Booking : AggregateRoot<Booking>
         Destination = destination;
         Price = 0;
         BookedByUserId = bookedByUserId;
-        Email = null;
-        Parcel = null;
     }
     public Guid Reference { get; }
     public string Origin { get; }
@@ -21,8 +19,4 @@ public sealed class Booking : AggregateRoot<Booking>
     public float Price { get; set; }
 
     public int BookedByUserId { get; set; }
-
-    public Email.Email? Email { get; set; }
-
-    public Parcel.Parcel? Parcel { get; set; }
 }
