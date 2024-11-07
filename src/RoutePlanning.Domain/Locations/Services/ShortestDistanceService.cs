@@ -11,25 +11,32 @@ public sealed class ShortestDistanceService : IShortestDistanceService
         this.locations = locations;
     }
 
-    public int CalculateShortestDistance(Location source, Location target)
+    public List<(string, string)> CalculateFastestPathPlane(Location source, Location target)
+    {
+        return CalculateShortestDistance(source, target);
+    }
+
+    public List<(string, string)> CalculateShortestDistance(Location source, Location target)
     {
         var locations = this.locations.Include(l => l.Connections).ThenInclude(c => c.Destination);
 
         var path = CalculateShortestPath(locations, source, target);
 
-        return path.Sum(c => c.Distance);
+        return path;
     }
 
     /// <summary>
     /// An implementation of the Dijkstra's shortest path algorithm
     /// </summary>
-    private static IEnumerable<Connection> CalculateShortestPath(IEnumerable<Location> locations, Location start, Location end)
+    private static List<(string, string)> CalculateShortestPath(IEnumerable<Location> locations, Location start, Location end)
     {
         var shortestConnections = CalculateShortestConnections(locations, start, end);
 
         var path = ConstructShortestPath(start, end, shortestConnections);
 
-        return path;
+        var route = DecupleThePath(path);
+
+        return route;
     }
 
     /// <summary>
@@ -69,7 +76,7 @@ public sealed class ShortestDistanceService : IShortestDistanceService
 
     private static void UpdateShortestConnections(Dictionary<Location, (Connection? SourceConnection, int Distance)> shortestConnections, Location location, Connection connection)
     {
-        var distance = shortestConnections[location].Distance + connection.Distance;
+        var distance = shortestConnections[location].Distance + 1;
 
         if (distance < shortestConnections[connection.Destination].Distance)
         {
@@ -95,5 +102,15 @@ public sealed class ShortestDistanceService : IShortestDistanceService
         path.Reverse();
 
         return path;
+    }
+
+    private static List<(string, string)> DecupleThePath(IEnumerable<Connection> route)
+    {
+        var decupled = new List<(string, string)>();
+        foreach (var connection in route)
+        {
+            decupled.Add(new(connection.Source.Name, connection.Destination.Name));
+        }
+        return decupled;
     }
 }

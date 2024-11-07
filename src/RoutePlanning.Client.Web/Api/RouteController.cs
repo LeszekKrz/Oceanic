@@ -34,7 +34,7 @@ public sealed class RoutesController : ControllerBase
     }
 
     [HttpPost("[action]")]
-    public async Task<RouteDTO> GetRoute(GetRouteRequest request, CancellationToken cancellationToken)
+    public async Task<RouteInfoDTO> GetRoute(GetRouteRequest request, CancellationToken cancellationToken)
     {
         return await mediator.Send(request, cancellationToken);
     }
@@ -51,7 +51,7 @@ public sealed class RoutesController : ControllerBase
         var test = "";
         if (response.IsSuccessStatusCode)
         {
-            var test1 = await response.Content.ReadFromJsonAsync(typeof(RouteDTO));
+            var test1 = await response.Content.ReadFromJsonAsync(typeof(RouteInfoDTO));
             test = "3";
         }
         return test;

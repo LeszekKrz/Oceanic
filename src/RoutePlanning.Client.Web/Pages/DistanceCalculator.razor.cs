@@ -28,7 +28,7 @@ public sealed partial class DistanceCalculator
         {
             DisplaySource = SelectedSource.Name;
             DisplayDestination = SelectedDestination.Name;
-            DisplayDistance = await Mediator.Send(new DistanceQuery(SelectedSource.LocationId, SelectedDestination.LocationId), CancellationToken.None);
+            var result = await Mediator.Send(new DistanceQuery(DisplaySource, DisplayDestination, 10, "Small", "Normal", true, false, false), CancellationToken.None);
         }
     }
 }

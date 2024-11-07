@@ -5,4 +5,4 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace RoutePlanning.Application.Locations.Commands.GetRoute;
-public sealed record RouteDTO(string from, string to, int time, int price);
+public sealed record RouteInfoDTO(string from, string to, int time, int price);

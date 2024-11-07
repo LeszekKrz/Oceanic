@@ -6,7 +6,7 @@ using RoutePlanning.Domain.Locations;
 
 namespace RoutePlanning.Application.Locations.Commands.GetRoute;
 
-public sealed class GetRouteRequestHandler : IQueryHandler<GetRouteRequest, RouteDTO>
+public sealed class GetRouteRequestHandler : IQueryHandler<GetRouteRequest, RouteInfoDTO>
 {
     //private readonly IRepository<Location> locations;
 
@@ -15,8 +15,8 @@ public sealed class GetRouteRequestHandler : IQueryHandler<GetRouteRequest, Rout
         //this.locations = locations;
     }
 
-    public Task<RouteDTO> Handle(GetRouteRequest command, CancellationToken cancellationToken)
+    public Task<RouteInfoDTO> Handle(GetRouteRequest command, CancellationToken cancellationToken)
     {
-        return Task.FromResult(new RouteDTO(command.From, command.To, 8, 40));
+        return Task.FromResult(new RouteInfoDTO(command.From, command.To, 8, 40));
     }
 }
