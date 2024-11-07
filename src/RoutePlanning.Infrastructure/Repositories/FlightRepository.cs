@@ -29,7 +29,7 @@ public class FlightRepository : IFlightRepository
 
     }
 
-    public void addFlight(Flight flight)
+    public void addFlight(Flight flight, CancellationToken cancellationToken)
     {
         _context.Set<Flight>().Add(flight);
     }
@@ -39,5 +39,5 @@ public interface IFlightRepository
 {
     public Task<List<Flight>> getFlightsByReference(Guid reference, CancellationToken cancellationToken);
 
-    public void addFlight(Flight flight);
+    public void addFlight(Flight flight, CancellationToken cancellationToken);
 }

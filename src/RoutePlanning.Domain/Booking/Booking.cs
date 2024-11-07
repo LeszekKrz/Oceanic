@@ -20,4 +20,6 @@ public sealed class Booking : AggregateRoot<Booking>
     public float Price { get; set; }
     public int Time { get; }
     public float Revenue { get; set; }
+
+    public int? BookedById {get;}
 }

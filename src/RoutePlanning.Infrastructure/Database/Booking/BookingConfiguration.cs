@@ -16,5 +16,6 @@ public sealed class BookingConfiguration : IEntityTypeConfiguration<Domain.Booki
         builder.Property(x => x.Price);
         builder.Property(x => x.Revenue).IsRequired();
         builder.Property(x => x.Time).IsRequired();
+        builder.Property(x => x.BookedById);
     }
 }
