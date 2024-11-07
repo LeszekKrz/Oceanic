@@ -58,7 +58,7 @@
 		try
 		{
 			// Send only username and password to the backend using CreateUserQuery
-			var query = new CreateUserQuery(Username, Password);
+			var query = new CreateUserQuery(Username, Password, Email, Address, PhoneNumber);
 			var authenticatedUser = await Mediator.Send(query);
 
 			if (authenticatedUser != null)
