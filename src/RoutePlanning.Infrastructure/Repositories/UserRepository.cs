@@ -64,7 +64,7 @@ public class UserRepository : IUserRepository
         return users;
     }
 
-    public async Task PromoteUser(int id, CancellationToken cancellationToken)
+    public async Task PromoteUser(User.EntityId id, CancellationToken cancellationToken)
     {
         var existingUser = await _context.Set<User>().FindAsync(new object[] { id }, cancellationToken);
 
@@ -111,7 +111,7 @@ public interface IUserRepository
 
     public Task<IReadOnlyList<User>> GetAllUsers(CancellationToken cancellationToken);
 
-    public Task PromoteUser(int id, CancellationToken cancellationToken);
+    public Task PromoteUser(User.EntityId id, CancellationToken cancellationToken);
 
     public Task RemoveUser(User.EntityId id, CancellationToken cancellationToken);
 }
