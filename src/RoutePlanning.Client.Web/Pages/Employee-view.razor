@@ -1,4 +1,6 @@
 ﻿@page "/employee-view"
+@inject MediatR.IMediator Mediator
+@using RoutePlanning.Application.Locations.Queries.SelectableLocationList
 
 <h3>Employee View - Pricing Matrix</h3>
 
@@ -30,6 +32,38 @@
     </tbody>
 </table>
 
+<h3>Locations Overview</h3>
+<p>Below is a list of all locations with a toggleable availability option (purely aesthetic):</p>
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th>Location Name</th>
+        <th>Availability</th>
+    </tr>
+    </thead>
+    <tbody>
+    @if (Locations != null && Locations.Any())
+    {
+        @foreach (var location in Locations)
+        {
+            <tr>
+                <td>@location.Name</td>
+                <td>
+                    <!-- Toggle availability purely for visual purposes -->
+                    <input type="checkbox" @bind="location.IsAvailable" />
+                </td>
+            </tr>
+        }
+    }
+    else
+    {
+        <tr>
+            <td colspan="2">No locations found.</td>
+        </tr>
+    }
+    </tbody>
+</table>
+
 
 
 @code {
@@ -44,6 +78,39 @@
         { "B", new Dictionary<string, decimal> { { "<1kg", 48 }, { "1-5kg", 68 }, { ">5kg", 88 } } },
         { "C", new Dictionary<string, decimal> { { "<1kg", 80 }, { "1-5kg", 100 }, { ">5kg", 120 } } }
     };
+
+	private List<SelectableLocationViewModel> Locations { get; set; } = new List<SelectableLocationViewModel>();
+
+	// Load locations on page initialization
+	protected override async Task OnInitializedAsync()
+	{
+		// Fetch locations from the database
+		var databaseLocations = await Mediator.Send(new SelectableLocationListQuery(), CancellationToken.None);
+
+		// Map each database location to the local view model, adding a default IsAvailable state
+		Locations = databaseLocations.Select(loc => new SelectableLocationViewModel
+			{
+				Name = loc.Name,
+				IsAvailable = true // Set initial state as unchecked or desired visual state
+			}).ToList();
+	}
+
+	// Define a local view model for the front end to add the IsAvailable toggle
+	public class SelectableLocationViewModel
+	{
+		public string? Name { get; set; }
+
+		// UI-only property for aesthetic toggle of availability
+		public bool IsAvailable { get; set; }
+	}
+
+    /*private IEnumerable<SelectableLocation>? Locations { get; set; }
+
+    // Load locations on page initialization
+    protected override async Task OnInitializedAsync()
+    {
+        Locations = await Mediator.Send(new SelectableLocationListQuery(), CancellationToken.None);
+    }*/
 
     /*private async Task UpdatePrices()
     {

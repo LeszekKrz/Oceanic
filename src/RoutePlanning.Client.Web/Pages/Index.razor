@@ -286,7 +286,7 @@
 		// Reset all validation flags
 		isFromValid = !string.IsNullOrWhiteSpace(FromLocation);
 		isToValid = !string.IsNullOrWhiteSpace(ToLocation) && FromLocation != ToLocation;
-		isWeightValid = Weight > 0;
+		isWeightValid = Weight > 0 && Weight <= 20;
 		isSizeValid = !string.IsNullOrWhiteSpace(Size);
 		isTypeValid = !string.IsNullOrWhiteSpace(Type);
 		isCheapestOrFastestValid = Cheapest || Fastest;
