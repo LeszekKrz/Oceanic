@@ -1,36 +1,52 @@
 ﻿@page "/employee-view"
 @inject MediatR.IMediator Mediator
+@inject IUserRepository UserRepository
 @using RoutePlanning.Application.Locations.Queries.SelectableLocationList
+@using RoutePlanning.Application.Price.ChangePrice
+@using RoutePlanning.Application.Price.GetAllPrices
+@using RoutePlanning.Client.Web.Authentication
+@using RoutePlanning.Domain.Users
+@using RoutePlanning.Infrastructure.Repositories
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <h3>Employee View - Pricing Matrix</h3>
-
 <p>Here you can view and update the pricing for different package sizes and weight categories in $.</p>
-
 <table class="table table-bordered">
     <thead>
     <tr>
-        <th>Size</th>
-        @foreach (var weightCategory in WeightCategories)
+        <th>Parcel Type</th>
+        @foreach (var weightCategory in WeightCategories2)
         {
             <th>@weightCategory</th>
         }
     </tr>
     </thead>
     <tbody>
-    @foreach (var size in Sizes)
+    @foreach (var parcelType in ParcelTypes)
     {
         <tr>
-            <td>@size</td>
-            @foreach (var weightCategory in WeightCategories)
+            <td>@parcelType</td>
+            @foreach (var weightCategory in WeightCategories2)
             {
                 <td>
-                    <input type="number" @bind="PriceMatrix[size][weightCategory]" />
+                    <!-- Editable input for Cost -->
+                    @{
+                        var price = Prices.FirstOrDefault(p => p.ParcelType == parcelType && p.ParcelWeight == weightCategory);
+                        var key = $"{parcelType}-{weightCategory}";
+
+                        <input type="number" @bind="UpdatedPrices[key]" />
+                    }
                 </td>
             }
         </tr>
     }
     </tbody>
 </table>
+
+<button class="btn btn-primary" @onclick="SaveChanges">Save Changes</button>
+
+
 
 <h3>Locations Overview</h3>
 <p>Location availability:</p>
@@ -68,22 +84,55 @@
 
 @code {
     // Define sizes and weight categories as lists -- <button class="btn btn-primary" @onclick="UpdatePrices">Update Prices</button>
-    private List<string> Sizes = new() { "A", "B", "C" };
-    private List<string> WeightCategories = new() { "<1kg", "1-5kg", ">5kg" };
-
-    // Dictionary to hold the price matrix data
-    private Dictionary<string, Dictionary<string, decimal>> PriceMatrix = new()
-    {
-        { "A", new Dictionary<string, decimal> { { "<1kg", 40 }, { "1-5kg", 60 }, { ">5kg", 80 } } },
-        { "B", new Dictionary<string, decimal> { { "<1kg", 48 }, { "1-5kg", 68 }, { ">5kg", 88 } } },
-        { "C", new Dictionary<string, decimal> { { "<1kg", 80 }, { "1-5kg", 100 }, { ">5kg", 120 } } }
-    };
+    private List<string> ParcelTypes { get; set; } = new List<string>();
+    private List<string> WeightCategories2 { get; set; } = new List<string>();
 
 	private List<SelectableLocationViewModel> Locations { get; set; } = new List<SelectableLocationViewModel>();
+
+    // Dictionary to hold updated prices (keyed by "ParcelType-WeightCategory")
+    private Dictionary<string, float> UpdatedPrices { get; set; } = new();
+
+    [Inject]
+    private SimpleAuthenticationStateProvider AuthStateProvider { get; set; } = default!;
+
+    private IReadOnlyList<RoutePlanning.Domain.Price.Price> Prices { get; set; } = new List<RoutePlanning.Domain.Price.Price>();
 
 	// Load locations on page initialization
 	protected override async Task OnInitializedAsync()
 	{
+        // Fetch the authenticated user's username
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var username = authState.User.Identity?.Name;
+
+        if (username != null)
+        {
+            // Get the user by username
+			var user = await UserRepository.getUserByNameOfAuthenticatedUser(username, CancellationToken.None);
+
+            if (user != null)
+            {
+                // Fetch the additional prices for the authenticated user
+                var priceQuery = new GetAllPricesQuery(new AuthenticatedUser(user.Username));
+                Prices = await Mediator.Send(priceQuery);
+            }
+
+			ParcelTypes = Prices.Select(p => p.ParcelType).Distinct().ToList();
+			WeightCategories2 = Prices.Select(p => p.ParcelWeight).Distinct().ToList();
+
+			// Initialize UpdatedPrices with current prices for each combination
+            // Initialize UpdatedPrices with current prices for each combination
+            foreach (var parcelType in ParcelTypes)
+            {
+                foreach (var weightCategory in WeightCategories2)
+                {
+                    var price = Prices.FirstOrDefault(p => p.ParcelType == parcelType && p.ParcelWeight == weightCategory);
+                    var key = $"{parcelType}-{weightCategory}";
+
+                    // Add an entry to UpdatedPrices with the current cost or 0 as default
+                    UpdatedPrices[key] = price?.Cost ?? 0;
+                }
+            }
+        }
 		// Fetch locations from the database
 		var databaseLocations = await Mediator.Send(new SelectableLocationListQuery(), CancellationToken.None);
 
@@ -93,6 +142,35 @@
 				Name = loc.Name,
 				IsAvailable = true // Set initial state as unchecked or desired visual state
 			}).ToList();
+	}
+
+    // Update the dictionary whenever an input field changes
+	
+
+    // Save changes to backend
+	private async Task SaveChanges()
+	{
+		var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+		var username = authState.User.Identity?.Name;
+		if (username == null) return;
+
+		var user = await UserRepository.getUserByNameOfAuthenticatedUser(username, CancellationToken.None);
+		if (user == null) return;
+
+		var authenticatedUser = new AuthenticatedUser(user.Username);
+
+		foreach (var (key, newPrice) in UpdatedPrices)
+		{
+			var parts = key.Split('-');
+			if (parts.Length != 2) continue;
+
+			var parcelType = parts[0];
+			var weightCategory = parts[1];
+
+			// Call ChangePriceQuery for each updated price
+			var changePriceQuery = new ChangePriceQuery(authenticatedUser, weightCategory, parcelType, newPrice);
+			await Mediator.Send(changePriceQuery);
+		}
 	}
 
 	// Define a local view model for the front end to add the IsAvailable toggle
