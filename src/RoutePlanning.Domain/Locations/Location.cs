@@ -6,10 +6,10 @@ namespace RoutePlanning.Domain.Locations;
 [DebuggerDisplay("{Name}")]
 public sealed class Location : AggregateRoot<Location>
 {
-    public Location(string name)
+    public Location(string name, bool airReachable = true)
     {
         Name = name;
-        airReachable = true;
+        this.airReachable = airReachable;
     }
 
     public string Name { get; set; }
