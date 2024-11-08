@@ -134,7 +134,7 @@
                                         <img src="@(step.TransportType == "Plane" ? "/images/plane-icon.svg" 
                                                   : step.TransportType == "Truck" ? "/images/truck-icon.svg" 
                                                   : step.TransportType == "Ship" ? "/images/ship-icon.svg" 
-                                                  : "/images/default-icon.svg")"
+                                                  : "/images/plane-icon.svg")"
                                              alt="@step.TransportType" class="transport-icon" />
                                         @step.Location - @step.ArrivalTime.ToString("dd/MM HH:mm")
                                     </li>
@@ -307,35 +307,44 @@
 				ship: Ships
 			);
 
-			if (routeDto != null)
-			{
-				var departureTime = DateTime.Now;
-                var arrivalTime = departureTime.AddHours(routeDto.time); // Calculate Arrival based on travel time in minutes
+            if (routeDto != null)
+            {
+                var departureTime = DateTime.Now;
 
-				// Create a new Result object based on the RouteDTO result
-				Results.Clear(); // Clear previous results, if any
-				Results.Add(new Result
-					{
-						Departure = departureTime,
-						Arrival = arrivalTime,
-						Price = routeDto.cost,
-						Route = routeDto.routeSegments.Select(segment => new RouteStep
-						{
-							Location = segment.Item2, // Destination location from the segment
-                            ArrivalTime = departureTime.AddHours(segment.Item3), // Add travel time to departure for each segment
-							TransportType = segment.Item1 // Transport type from the segment
-						}).ToList()
-					});
+                // Create a new Result object based on the RouteDTO result
+                Results.Clear(); // Clear previous results, if any
+                Results.Add(new Result
+                {
+                    Departure = departureTime,
+                    Arrival = departureTime.AddHours(routeDto.time), // Calculate total arrival time
+                    Price = routeDto.cost,
+                    Route = new List<RouteStep>
+                        {
+                            // Initial RouteStep for the "From" location
+                            new RouteStep
+                            {
+                                Location = FromLocation,    // Starting location
+                                ArrivalTime = departureTime, // Set to departure time
+                                TransportType = "Start"      // Optionally mark as starting point
+                            }
+                        }
+                        .Concat(routeDto.routeSegments.Select((segment, index) => new RouteStep
+                        {
+                            Location = segment.Item2, // Destination location from the segment
+                            ArrivalTime = departureTime.AddHours(routeDto.routeSegments.Take(index + 1).Sum(s => s.Item3)), // Cumulative travel time
+                            TransportType = segment.Item1 // Transport type from the segment
+                        })).ToList()
+                });
 
-				showResults = true; // Display the results
-			}
-			else
-			{
-				// Handle null RouteDTO result by updating validationSummary or providing feedback
-				validationSummary = "No route data available for the selected options. Please adjust your selection.";
-				showResults = false;
-			}
-		}
+                showResults = true; // Display the results
+            }
+            else
+            {
+                // Handle null RouteDTO result by updating validationSummary or providing feedback
+                validationSummary = "No route data available for the selected options. Please adjust your selection.";
+                showResults = false;
+            }
+        }
 		else
 		{
 			showResults = false; // Hide results if validation fails
