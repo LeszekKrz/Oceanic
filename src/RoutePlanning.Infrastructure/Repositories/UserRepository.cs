@@ -81,9 +81,9 @@ public class UserRepository : IUserRepository
         await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task RemoveUser(int id, CancellationToken cancellationToken)
+    public async Task RemoveUser(User.EntityId id, CancellationToken cancellationToken)
     {
-        var existingUser = await _context.Set<User>().FindAsync(new object[] { id }, cancellationToken);
+        var existingUser = await _context.Set<User>().FindAsync(new object[] {id }, cancellationToken);
 
         if (existingUser == null)
         {
@@ -113,5 +113,5 @@ public interface IUserRepository
 
     public Task PromoteUser(int id, CancellationToken cancellationToken);
 
-    public Task RemoveUser(int id, CancellationToken cancellationToken);
+    public Task RemoveUser(User.EntityId id, CancellationToken cancellationToken);
 }
