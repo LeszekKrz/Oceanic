@@ -2,6 +2,7 @@
 @using System.ComponentModel.DataAnnotations
 @using RoutePlanning.Application.Locations.Queries.Distance
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject MediatR.IMediator Mediator
 
 <div class="main-container">
     <header class="header">
@@ -175,7 +176,6 @@
 @code {
 	public string FromLocation { get; set; } = string.Empty;
 	public string ToLocation { get; set; } = string.Empty;
-	private DistanceCalculator distanceCalculator = new DistanceCalculator();
 
 
 	private List<string> AvailableCities = new List<string>
@@ -296,7 +296,7 @@
 		if (isFromValid && isToValid && isWeightValid && isSizeValid && isTypeValid && isCheapestOrFastestValid && isConditionsValid)
 		{
 			// Call CalculateDistance and check for null result
-			var routeDto = await distanceCalculator.CalculateDistance(
+			var routeDto = await CalculateDistance(
 				from: FromLocation,
 				to: ToLocation,
 				weight: Weight,
@@ -310,7 +310,7 @@
 			if (routeDto != null)
 			{
 				var departureTime = DateTime.Now;
-				var arrivalTime = departureTime.AddMinutes(routeDto.time); // Calculate Arrival based on travel time in minutes
+                var arrivalTime = departureTime.AddHours(routeDto.time); // Calculate Arrival based on travel time in minutes
 
 				// Create a new Result object based on the RouteDTO result
 				Results.Clear(); // Clear previous results, if any
@@ -322,7 +322,7 @@
 						Route = routeDto.routeSegments.Select(segment => new RouteStep
 						{
 							Location = segment.Item2, // Destination location from the segment
-							ArrivalTime = departureTime.AddMinutes(segment.Item3), // Add travel time to departure for each segment
+                            ArrivalTime = departureTime.AddHours(segment.Item3), // Add travel time to departure for each segment
 							TransportType = segment.Item1 // Transport type from the segment
 						}).ToList()
 					});
@@ -433,6 +433,19 @@
     {
         ToLocation = city;
         FilteredToCities.Clear();
+    }
+
+    public async Task<RouteDTO?> CalculateDistance(string from, string to, float weight, string size, string type, bool fast, bool car, bool ship)
+    {
+        var a = 3;
+        a += 3;
+
+        // Attempt to send the query and get the RouteDTO result
+        var result = await Mediator.Send(new DistanceQuery(from, to, weight, size, type, fast, car, ship), CancellationToken.None);
+
+        // Return the result, which might be null if no data is available
+        return result;
+        // Explicitly return null if SelectedSource or SelectedDestination are invalid
     }
 
 	//This section is made for the route boxes.

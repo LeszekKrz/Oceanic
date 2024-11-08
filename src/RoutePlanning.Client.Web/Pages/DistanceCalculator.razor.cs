@@ -24,18 +24,14 @@ public sealed partial class DistanceCalculator
 
     public async Task<RouteDTO?> CalculateDistance(string from, string to, float weight, string size, string type, bool fast, bool car, bool ship)
     {
-        if (SelectedSource is not null && SelectedDestination is not null)
-        {
-            DisplaySource = SelectedSource.Name;
-            DisplayDestination = SelectedDestination.Name;
+        var a = 3;
+        a += 3;
 
-            // Attempt to send the query and get the RouteDTO result
-            var result = await Mediator.Send(new DistanceQuery(from, to, weight, size, type, fast, car, ship), CancellationToken.None);
+        // Attempt to send the query and get the RouteDTO result
+        var result = await Mediator.Send(new DistanceQuery(from, to, weight, size, type, fast, car, ship), CancellationToken.None);
 
-            // Return the result, which might be null if no data is available
-            return result;
-        }
-
-        return null; // Explicitly return null if SelectedSource or SelectedDestination are invalid
+        // Return the result, which might be null if no data is available
+        return result;
+        // Explicitly return null if SelectedSource or SelectedDestination are invalid
     }
 }

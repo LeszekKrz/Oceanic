@@ -28,7 +28,7 @@ public sealed class GetRouteRequestHandler : IQueryHandler<GetRouteRequest, Rout
             {
                 var prices = await priceRepository.getAllPrices(cancellationToken);
                 var price = prices.Where(p => p.ParcelWeight == command.weight && p.ParcelType == command.size).FirstOrDefault();
-                return new RouteInfoDTO(true, command.From, command.To, 8, price?.Cost ?? 0);
+                return new RouteInfoDTO(true, command.From, command.To, 8, price?.Cost ?? 50);
             }
         }
         return new RouteInfoDTO(false, "", "", 0, 0);

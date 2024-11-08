@@ -60,31 +60,31 @@ public static class DatabaseInitialization
 
     private static async Task SeedPrices(RoutePlanningDatabaseContext context)
     {
-        var price11 = new Price("small" ,">1kg", 40);
+        var price11 = new Price("Small", "<1kg", 40);
         await context.AddAsync(price11);
 
-        var price12 = new Price("medium", ">1kg", 60);
+        var price12 = new Price("Medium", "<1kg", 60);
         await context.AddAsync(price12);
 
-        var price13 = new Price("large", ">1kg", 80);
+        var price13 = new Price("Large", "<1kg", 80);
         await context.AddAsync(price13);
 
-        var price21 = new Price("small", ">5kg", 48);
+        var price21 = new Price("Small", "<5kg", 48);
         await context.AddAsync(price21);
 
-        var price22 = new Price("medium", ">5kg", 68);
+        var price22 = new Price("Medium", "<5kg", 68);
         await context.AddAsync(price22);
 
-        var price23 = new Price("large", ">5kg", 88);
+        var price23 = new Price("Large", "<5kg", 88);
         await context.AddAsync(price23);
 
-        var price31 = new Price("small", "5kg<", 80);
+        var price31 = new Price("Small", ">5kg", 80);
         await context.AddAsync(price31);
 
-        var price32 = new Price("medium", "5kg<", 100);
+        var price32 = new Price("Medium", ">5kg", 100);
         await context.AddAsync(price32);
 
-        var price33 = new Price("large", "5kg<", 120);
+        var price33 = new Price("Large", ">5kg", 120);
         await context.AddAsync(price33);
     }
 

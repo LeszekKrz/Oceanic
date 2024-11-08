@@ -14,7 +14,7 @@ public sealed class Location : AggregateRoot<Location>
 
     public string Name { get; set; }
 
-    public bool airReachable {  get; set; }
+    public bool airReachable { get; set; }
 
     private readonly List<Connection> connections = [];
 

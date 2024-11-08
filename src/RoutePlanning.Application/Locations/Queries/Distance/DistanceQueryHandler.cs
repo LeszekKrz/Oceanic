@@ -29,7 +29,41 @@ public sealed class DistanceQueryhandler : IQueryHandler<DistanceQuery, RouteDTO
         var route = shortestDistanceService.CalculateFastestPathPlane(source, destination);
 
         // get price
-        var price = 50.0f;
+        var priceBracket = "";
+        if (request.weight <= 1)
+        {
+            priceBracket = "<1kg";
+        }
+        else if (request.weight <= 5)
+        {
+            priceBracket = "<5kg";
+        }
+        else
+        {
+            priceBracket = ">5kg";
+        }
+        var price = 50.0f; // default
+        var prices = await priceRepository.getAllPrices(cancellationToken);
+        var pricePossible = prices.Where(p => p.ParcelWeight == priceBracket && p.ParcelType == request.size).FirstOrDefault();
+        if (pricePossible != null)
+        {
+            price = pricePossible.Cost;
+        }
+
+        var priceMult = 1.0f;
+        switch (request.type)
+        {
+            case "Weapons":
+                priceMult = 2.0f;
+                break;
+            case "Cautious Parcels":
+                priceMult = 1.75f;
+                break;
+            case "Refrigerated Goods":
+                priceMult = 1.1f;
+                break;
+        }
+        price *= priceMult;
         // get time
         var time = 8;
 
