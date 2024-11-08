@@ -1,6 +1,135 @@
 ﻿@page "/admin-view"
-<h3>Admin_view</h3>
+@using RoutePlanning.Application.Users.Queries.GetAllUsers
+@using RoutePlanning.Application.Users.Queries.PromoteUser
+@using RoutePlanning.Application.Users.Queries.RemoveUser
+@using RoutePlanning.Domain.Users
+@using RoutePlanning.Infrastructure.Repositories
+@inject MediatR.IMediator Mediator
+@inject IUserRepository UserRepository
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<h3>Admin View - All Users</h3>
+
+@if (Users == null)
+{
+    <p>Loading users...</p>
+}
+else if (Users.Any())
+{
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Employee Status</th>
+				<th>Admin Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in Users)
+            {
+                <tr>
+                    <td>@user.Id</td>
+                    <td>@user.Username</td>
+                    <td>@user.Email</td>
+                    <td>@(user.IsEmployee ? "Employee" : "Not Employee")</td>
+                    <td>@(user.IsAdmin ? "Admin" : "Not Admin")</td>
+                    <td>
+                        @if (!user.IsEmployee)
+                        {
+                            <button class="btn btn-primary btn-sm" @onclick="() => PromoteUser(user.Id)">Promote</button>
+                        }
+						@if (!user.IsAdmin)
+                        {
+                            <button class="btn btn-danger btn-sm" @onclick="() => DeleteUser(user.Id)">Delete</button>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No users found.</p>
+}
 
 @code {
-    
+    private List<User>? Users { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUsersAsync();
+    }
+
+    private async Task LoadUsersAsync()
+    {
+        // Retrieve authenticated user
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var username = authState.User.Identity?.Name;
+        if (username == null) return;
+
+        var user = await UserRepository.getUserByNameOfAuthenticatedUser(username, CancellationToken.None);
+        if (user == null) return;
+
+        var authenticatedUser = new Domain.Users.AuthenticatedUser(user.Username);
+
+        // Send the GetAllUsersQuery to fetch users
+        var userQuery = new GetAllUsersQuery(authenticatedUser);
+        Users = (await Mediator.Send(userQuery)).ToList();
+    }
+
+	private async Task PromoteUser(User.EntityId userId)
+    {
+        // Retrieve authenticated user
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var username = authState.User.Identity?.Name;
+        if (username == null) return;
+
+        var user = await UserRepository.getUserByNameOfAuthenticatedUser(username, CancellationToken.None);
+        if (user == null) return;
+
+        var authenticatedUser = new Domain.Users.AuthenticatedUser(user.Username);
+
+        // Send PromoteUserQuery to promote the user
+        var promoteUserQuery = new PromoteUserQuery(authenticatedUser, userId);
+        var result = await Mediator.Send(promoteUserQuery);
+
+        if (result)
+        {
+            await LoadUsersAsync(); // Reload users to update the table
+        }
+        else
+        {
+            Console.WriteLine("Error promoting user");
+        }
+    }
+
+	private async Task DeleteUser(User.EntityId userId)
+    {
+        // Retrieve authenticated user
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var username = authState.User.Identity?.Name;
+        if (username == null) return;
+
+        var user = await UserRepository.getUserByNameOfAuthenticatedUser(username, CancellationToken.None);
+        if (user == null) return;
+
+        var authenticatedUser = new Domain.Users.AuthenticatedUser(user.Username);
+
+        // Send RemoveUserQuery to delete the user
+        var removeUserQuery = new RemoveUserQuery(authenticatedUser, userId);
+        var result = await Mediator.Send(removeUserQuery);
+
+        if (result)
+        {
+            await LoadUsersAsync(); // Reload users to update the table
+        }
+        else
+        {
+            Console.WriteLine("Error deleting user");
+        }
+    }
 }
